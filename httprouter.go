@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"objects"
 	"time"
+	"utils"
 
 	"github.com/go-chi/cors"
 	"github.com/google/uuid"
@@ -27,6 +28,35 @@ func ErrHandle(w http.ResponseWriter, r *http.Request) {
 	RespondWithError(w, 200, "Internal Server Error")
 }
 
+// returns a user with the specific ApiKey
+func GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request) {
+	apiKey := utils.ExtractAPIKey(r.Header.Get("Authorization"))
+	if apiKey == "" {
+		RespondWithJSON(w, http.StatusUnauthorized, objects.NoResponse{})
+		return
+	}
+
+	ctx := context.Background()
+	config, err := InitConn()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	dbUser, err := config.DB.GetUser(ctx, apiKey)
+	if err != nil {
+		RespondWithError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusAccepted, objects.ResponseBodyUser{
+		ID:        string(dbUser.ID.String()),
+		CreateAt:  dbUser.CreatedAt.String(),
+		UpdatedAt: dbUser.UpdatedAt.String(),
+		Name:      dbUser.Name,
+		ApiKey:    dbUser.ApiKey,
+	})
+}
+
+// creates a new user
 func CreateUserHandle(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	config, err := InitConn()
@@ -51,7 +81,13 @@ func CreateUserHandle(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, dbUser)
+	RespondWithJSON(w, http.StatusOK, objects.ResponseBodyUser{
+		ID:        string(dbUser.ID.String()),
+		CreateAt:  dbUser.CreatedAt.String(),
+		UpdatedAt: dbUser.UpdatedAt.String(),
+		Name:      dbUser.Name,
+		ApiKey:    dbUser.ApiKey,
+	})
 }
 
 // middleware that determines which headers, http methods and orgins are allowed

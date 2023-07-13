@@ -18,6 +18,7 @@ func main() {
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
+	v1.Get("/users", GetUserByApiKeyHandle)
 	v1.Post("/users", CreateUserHandle)
 	r.Mount("/v1", v1)
 

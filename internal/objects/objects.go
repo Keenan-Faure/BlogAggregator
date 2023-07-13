@@ -15,11 +15,15 @@ type RequestBodyUser struct {
 	Name string `json:"name"`
 }
 
+type NoResponse struct {
+}
+
 type ResponseBodyUser struct {
 	ID        string `json:"id"`
 	CreateAt  string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Name      string `json:"name"`
+	ApiKey    string `json:"api_key"`
 }
 
 type ReadyHandle struct {

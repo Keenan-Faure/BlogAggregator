@@ -13,7 +13,7 @@ type dbConfig struct {
 // Initiates a connection to the database and
 // if successful returns the connection
 func InitConn() (dbConfig, error) {
-	dbURL := utils.LoadEnv("conn")
+	dbURL := utils.LoadEnv("db_url")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return dbConfig{}, err
