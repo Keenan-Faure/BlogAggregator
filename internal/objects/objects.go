@@ -4,6 +4,24 @@ import (
 	"time"
 )
 
+type CreateUserParam struct {
+	ID        string `json:"id"`
+	CreateAt  string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Name      string `json:"name"`
+}
+
+type RequestBodyUser struct {
+	Name string `json:"name"`
+}
+
+type ResponseBodyUser struct {
+	ID        string `json:"id"`
+	CreateAt  string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Name      string `json:"name"`
+}
+
 type ReadyHandle struct {
 	Status string `json:"status"`
 }
