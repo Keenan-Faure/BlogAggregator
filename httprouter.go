@@ -2,9 +2,7 @@ package main
 
 import (
 	"blog/internal/database"
-	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"objects"
 	"time"
@@ -29,20 +27,14 @@ func ErrHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 // returns a user with the specific ApiKey
-func GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request) {
+func (dbConfig *dbConfig) GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request) {
 	apiKey := utils.ExtractAPIKey(r.Header.Get("Authorization"))
 	if apiKey == "" {
 		RespondWithJSON(w, http.StatusUnauthorized, objects.NoResponse{})
 		return
 	}
 
-	ctx := context.Background()
-	config, err := InitConn()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	dbUser, err := config.DB.GetUser(ctx, apiKey)
+	dbUser, err := dbConfig.DB.GetUser(r.Context(), apiKey)
 	if err != nil {
 		RespondWithError(w, http.StatusNotFound, err.Error())
 		return
@@ -57,21 +49,15 @@ func GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 // creates a new user
-func CreateUserHandle(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	config, err := InitConn()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+func (dbConfig *dbConfig) CreateUserHandle(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	params := objects.RequestBodyUser{}
-	err = decoder.Decode(&params)
+	err := decoder.Decode(&params)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "Something went wrong")
+		RespondWithError(w, http.StatusBadRequest, "Something went wrong")
 		return
 	}
-	dbUser, err := config.DB.CreateUser(ctx, database.CreateUserParams{
+	dbUser, err := dbConfig.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),

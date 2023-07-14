@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blog/internal/database"
 	"log"
 	"net/http"
 	"utils"
@@ -10,16 +11,25 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type dbConfig struct {
+	DB *database.Queries
+}
+
 func main() {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(MiddleWare()))
 
 	v1 := chi.NewRouter()
 
+	dbconfig, err := InitConn()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
-	v1.Get("/users", GetUserByApiKeyHandle)
-	v1.Post("/users", CreateUserHandle)
+	v1.Get("/users", dbconfig.GetUserByApiKeyHandle)
+	v1.Post("/users", dbconfig.CreateUserHandle)
 	r.Mount("/v1", v1)
 
 	port := utils.LoadEnv("port")

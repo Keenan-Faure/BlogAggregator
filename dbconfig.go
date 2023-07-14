@@ -6,10 +6,6 @@ import (
 	"utils"
 )
 
-type dbConfig struct {
-	DB *database.Queries
-}
-
 // Initiates a connection to the database and
 // if successful returns the connection
 func InitConn() (dbConfig, error) {
