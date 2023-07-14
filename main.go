@@ -28,7 +28,8 @@ func main() {
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
-	v1.Get("/users", dbconfig.GetUserByApiKeyHandle)
+	v1.Get("/users", dbconfig.middlewareAuth(dbconfig.GetUserByApiKeyHandle))
+	v1.Post("/feed", dbconfig.middlewareAuth(dbconfig.CreateFeedHandler))
 	v1.Post("/users", dbconfig.CreateUserHandle)
 	r.Mount("/v1", v1)
 

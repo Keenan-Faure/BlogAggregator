@@ -23,14 +23,14 @@ func TestLoadEnv(t *testing.T) {
 func TestExtractApiKey(t *testing.T) {
 	fmt.Println("Test Case 1 - Empty Header")
 	expected := ""
-	actual := ExtractAPIKey("")
-	if expected != actual {
-		t.Errorf("Expected '' but found " + actual)
+	actual, err := ExtractAPIKey("")
+	if err == nil {
+		t.Errorf("Expected error but found " + actual)
 	}
 	fmt.Println("Test Case 2 - ApiKey exists in header")
 	expected = "ApiKey erbaj7ia8nasdasd7"
-	actual = ExtractAPIKey(expected)
-	if actual != "erbaj7ia8nasdasd7" {
-		t.Errorf("Expected 'erbaj7ia8nasdasd7' but found " + actual)
+	actual, err = ExtractAPIKey(expected)
+	if err != nil {
+		t.Errorf("Expected 'nil' but found " + actual)
 	}
 }

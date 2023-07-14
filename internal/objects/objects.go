@@ -4,9 +4,14 @@ import (
 	"time"
 )
 
+type CreateFeedParam struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
 type CreateUserParam struct {
 	ID        string `json:"id"`
-	CreateAt  string `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Name      string `json:"name"`
 }
@@ -15,15 +20,26 @@ type RequestBodyUser struct {
 	Name string `json:"name"`
 }
 
-type NoResponse struct {
+type RequestBodyFeed struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
 }
 
 type ResponseBodyUser struct {
 	ID        string `json:"id"`
-	CreateAt  string `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Name      string `json:"name"`
 	ApiKey    string `json:"api_key"`
+}
+
+type ResponseBodyFeed struct {
+	ID        string `json:"id"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	UserID    string `json:"user_id"`
 }
 
 type ReadyHandle struct {

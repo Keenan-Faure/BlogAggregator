@@ -50,6 +50,14 @@ func createRoutes() map[string]objects.Route {
 			Format:        objects.RequestBodyUser{},
 			Authorization: "None",
 		},
+		"POST /v1/feeds": {
+			Description:   "Creates a new feed",
+			Supports:      []string{"POST"},
+			Params:        map[string]objects.Params{},
+			AcceptsData:   true,
+			Format:        objects.RequestBodyFeed{},
+			Authorization: "Authorization: ApiKey <key>",
+		},
 	}
 	return routes
 }

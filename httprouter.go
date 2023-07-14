@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"objects"
 	"time"
-	"utils"
 
 	"github.com/go-chi/cors"
 	"github.com/google/uuid"
@@ -14,47 +13,45 @@ import (
 
 // v1 handlers
 
-// test for RespondWithJSON
-func ReadiHandle(w http.ResponseWriter, r *http.Request) {
-	RespondWithJSON(w, 200, objects.ReadyHandle{
-		Status: "ok",
+func (dbConfig *dbConfig) CreateFeedHandler(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	params, err := DecodeFeedRequestBody(r)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if FeedValidation(params) != nil {
+		RespondWithError(w, http.StatusBadRequest, "data validation error")
+		return
+	}
+	feed, err := dbConfig.DB.CreateFeed(r.Context(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		Name:      params.Name,
+		Url:       params.URL,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    dbUser.ID,
 	})
-}
-
-// error handler
-func ErrHandle(w http.ResponseWriter, r *http.Request) {
-	RespondWithError(w, 200, "Internal Server Error")
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseFeedToObject(feed))
 }
 
 // returns a user with the specific ApiKey
-func (dbConfig *dbConfig) GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request) {
-	apiKey := utils.ExtractAPIKey(r.Header.Get("Authorization"))
-	if apiKey == "" {
-		RespondWithJSON(w, http.StatusUnauthorized, objects.NoResponse{})
-		return
-	}
-
-	dbUser, err := dbConfig.DB.GetUser(r.Context(), apiKey)
-	if err != nil {
-		RespondWithError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	RespondWithJSON(w, http.StatusAccepted, objects.ResponseBodyUser{
-		ID:        string(dbUser.ID.String()),
-		CreateAt:  dbUser.CreatedAt.String(),
-		UpdatedAt: dbUser.UpdatedAt.String(),
-		Name:      dbUser.Name,
-		ApiKey:    dbUser.ApiKey,
-	})
+func (dbConfig *dbConfig) GetUserByApiKeyHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	RespondWithJSON(w, http.StatusAccepted, DatabaseUserToObject(dbUser))
 }
 
 // creates a new user
 func (dbConfig *dbConfig) CreateUserHandle(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	params := objects.RequestBodyUser{}
-	err := decoder.Decode(&params)
+	params, err := DecodeUserRequestBody(r)
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, "Something went wrong")
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if UserValidation(params) != nil {
+		RespondWithError(w, http.StatusBadRequest, "data validation error")
 		return
 	}
 	dbUser, err := dbConfig.DB.CreateUser(r.Context(), database.CreateUserParams{
@@ -67,13 +64,19 @@ func (dbConfig *dbConfig) CreateUserHandle(w http.ResponseWriter, r *http.Reques
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, objects.ResponseBodyUser{
-		ID:        string(dbUser.ID.String()),
-		CreateAt:  dbUser.CreatedAt.String(),
-		UpdatedAt: dbUser.UpdatedAt.String(),
-		Name:      dbUser.Name,
-		ApiKey:    dbUser.ApiKey,
+	RespondWithJSON(w, http.StatusOK, DatabaseUserToObject(dbUser))
+}
+
+// test for RespondWithJSON
+func ReadiHandle(w http.ResponseWriter, r *http.Request) {
+	RespondWithJSON(w, 200, objects.ReadyHandle{
+		Status: "ok",
 	})
+}
+
+// error handler
+func ErrHandle(w http.ResponseWriter, r *http.Request) {
+	RespondWithError(w, 200, "Internal Server Error")
 }
 
 // middleware that determines which headers, http methods and orgins are allowed

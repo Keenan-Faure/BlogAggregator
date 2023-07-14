@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -13,10 +14,16 @@ func LoadEnv(key string) string {
 	return value
 }
 
-// extracts the API Key from the auth string
-func ExtractAPIKey(authString string) string {
+// Authorization: ApiKey <key>
+func ExtractAPIKey(authString string) (string, error) {
 	if authString == "" {
-		return ""
+		return "", errors.New("no Authorization found in header")
 	}
-	return authString[7:]
+	if len(authString) <= 7 {
+		return "", errors.New("malformed Auth Header")
+	}
+	if authString[0:6] != "ApiKey" {
+		return "", errors.New("malformed second part of authentication")
+	}
+	return authString[7:], nil
 }
