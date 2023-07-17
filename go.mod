@@ -16,6 +16,6 @@ require (
 )
 
 require (
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/google/uuid v1.3.0 // direct
+	github.com/lib/pq v1.10.9 // direct
 )

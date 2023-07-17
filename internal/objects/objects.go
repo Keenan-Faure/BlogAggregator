@@ -25,21 +25,8 @@ type RequestBodyFeed struct {
 	URL  string `json:"url"`
 }
 
-type ResponseBodyUser struct {
-	ID        string `json:"id"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Name      string `json:"name"`
-	ApiKey    string `json:"api_key"`
-}
-
-type ResponseBodyFeed struct {
-	ID        string `json:"id"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Name      string `json:"name"`
-	URL       string `json:"url"`
-	UserID    string `json:"user_id"`
+type RequestBodyFeedFollow struct {
+	FeedID string `json:"feed_id"`
 }
 
 type ReadyHandle struct {

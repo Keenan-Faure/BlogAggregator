@@ -8,3 +8,14 @@ INSERT INTO feeds(
     user_id
 ) VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
+
+-- name: GetFeeds :many
+SELECT * FROM feeds;
+
+-- name: GetFeed :one
+SELECT * FROM feeds
+WHERE id = $1;
+
+-- name: GetFeedByURL :one
+SELECT * FROM feeds
+WHERE "url" = $1;

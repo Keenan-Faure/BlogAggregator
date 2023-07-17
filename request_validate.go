@@ -1,22 +1,21 @@
 package main
 
 import (
-	"blog/internal/database"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"objects"
 )
 
-// valiates a user
+// User: validation
 func UserValidation(user objects.RequestBodyUser) error {
 	if user.Name == "" {
-		return errors.New("Empty Name not allowed")
+		return errors.New("empty name not allowed")
 	}
 	return nil
 }
 
-// decodes the request body
+// User: decodes the request body
 func DecodeUserRequestBody(r *http.Request) (objects.RequestBodyUser, error) {
 	decoder := json.NewDecoder(r.Body)
 	params := objects.RequestBodyUser{}
@@ -27,29 +26,18 @@ func DecodeUserRequestBody(r *http.Request) (objects.RequestBodyUser, error) {
 	return params, nil
 }
 
-// converts a database user to an object
-func DatabaseUserToObject(dbUser database.User) objects.ResponseBodyUser {
-	return objects.ResponseBodyUser{
-		ID:        dbUser.ID.String(),
-		CreatedAt: dbUser.CreatedAt.String(),
-		UpdatedAt: dbUser.UpdatedAt.String(),
-		Name:      dbUser.Name,
-		ApiKey:    dbUser.ApiKey,
-	}
-}
-
-// validates a feed
+// Feed: validation
 func FeedValidation(feed objects.RequestBodyFeed) error {
 	if feed.Name == "" {
-		return errors.New("Empty Name not allowed")
+		return errors.New("empty name not allowed")
 	}
 	if feed.URL == "" {
-		return errors.New("Empty URL not allowed")
+		return errors.New("empty URL not allowed")
 	}
 	return nil
 }
 
-// decodes the request body
+// Feed: decodes the request body
 func DecodeFeedRequestBody(r *http.Request) (objects.RequestBodyFeed, error) {
 	decoder := json.NewDecoder(r.Body)
 	params := objects.RequestBodyFeed{}
@@ -60,14 +48,21 @@ func DecodeFeedRequestBody(r *http.Request) (objects.RequestBodyFeed, error) {
 	return params, nil
 }
 
-// converts a database user to an object
-func DatabaseFeedToObject(feed database.Feed) objects.ResponseBodyFeed {
-	return objects.ResponseBodyFeed{
-		ID:        feed.ID.String(),
-		Name:      feed.Name,
-		URL:       feed.Url,
-		CreatedAt: feed.CreatedAt.String(),
-		UpdatedAt: feed.UpdatedAt.String(),
-		UserID:    feed.UserID.String(),
+// FeedFollow: decodes the request body
+func DecodeFeedFollowRequestBody(r *http.Request) (objects.RequestBodyFeedFollow, error) {
+	decoder := json.NewDecoder(r.Body)
+	params := objects.RequestBodyFeedFollow{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		return params, err
 	}
+	return params, nil
+}
+
+// FeedFollow: validation
+func FeedFollowValidation(feed objects.RequestBodyFeedFollow) error {
+	if feed.FeedID == "" {
+		return errors.New("empty feed_id not allowed")
+	}
+	return nil
 }

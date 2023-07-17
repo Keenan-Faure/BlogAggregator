@@ -58,6 +58,30 @@ func createRoutes() map[string]objects.Route {
 			Format:        objects.RequestBodyFeed{},
 			Authorization: "Authorization: ApiKey <key>",
 		},
+		"GET /v1/feeds": {
+			Description:   "Gets all feeds",
+			Supports:      []string{"GET"},
+			Params:        map[string]objects.Params{},
+			AcceptsData:   false,
+			Format:        []string{},
+			Authorization: "None",
+		},
+		"POST /v1/feed_follows": {
+			Description:   "Follows a feed",
+			Supports:      []string{"POST"},
+			Params:        map[string]objects.Params{},
+			AcceptsData:   false,
+			Format:        objects.RequestBodyFeedFollow{},
+			Authorization: "Authorization: ApiKey <key>",
+		},
+		"DELETE /v1/feed_follows/{feedFollowID}": {
+			Description:   "Unfollows a feed",
+			Supports:      []string{"DELETE"},
+			Params:        map[string]objects.Params{},
+			AcceptsData:   false,
+			Format:        []string{},
+			Authorization: "None",
+		},
 	}
 	return routes
 }

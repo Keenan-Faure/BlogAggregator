@@ -8,8 +8,12 @@ VALUES (
 )
 RETURNING *;
 
--- name: GetUser :one
+-- name: GetUserByAPI :one
 SELECT * FROM users
 WHERE api_key = $1;
+
+-- name: GetUser :one
+select * from users
+WHERE "name" = $1;
 
 -- https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html

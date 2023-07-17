@@ -29,8 +29,12 @@ func main() {
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
 	v1.Get("/users", dbconfig.middlewareAuth(dbconfig.GetUserByApiKeyHandle))
-	v1.Post("/feed", dbconfig.middlewareAuth(dbconfig.CreateFeedHandler))
 	v1.Post("/users", dbconfig.CreateUserHandle)
+	v1.Post("/feed", dbconfig.middlewareAuth(dbconfig.CreateFeedHandler))
+	v1.Get("/feed", dbconfig.GetAllFeedsHandle)
+	v1.Get("/feed_follows", dbconfig.middlewareAuth(dbconfig.GetFeedFollowHandle))
+	v1.Post("/feed_follows", dbconfig.middlewareAuth(dbconfig.CreateFeedFollowHandle))
+	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.UnFollowFeedHandle)
 	r.Mount("/v1", v1)
 
 	port := utils.LoadEnv("port")

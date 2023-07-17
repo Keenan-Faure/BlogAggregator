@@ -17,7 +17,7 @@ func (dbConfig *dbConfig) middlewareAuth(handler authHandler) http.HandlerFunc {
 			RespondWithError(w, http.StatusUnauthorized, err.Error())
 			return
 		}
-		dbUser, err := dbConfig.DB.GetUser(r.Context(), apiKey)
+		dbUser, err := dbConfig.DB.GetUserByAPI(r.Context(), apiKey)
 		if err != nil {
 			RespondWithError(w, http.StatusNotFound, err.Error())
 			return
