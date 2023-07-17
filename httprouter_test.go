@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"testing"
 	"utils"
 
 	"github.com/go-chi/chi/v5"
@@ -43,14 +45,67 @@ func Init_Main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func GetURL(url string) (*http.Response, error) {
-	return http.Get(url)
+func TestCheckFeedFollowExist(t *testing.T) {
+	Init_Main()
+	fmt.Println("Test case 1 - valid feed id")
+
 }
 
-func PostURL(url string, bodyData map[string]any) (*http.Response, error) {
-	jsonStr, err := json.Marshal(bodyData)
+//helper functions
+
+func GetURL(url string, bodyData map[string]any) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := GetRequest(url, "GET", bodyData)
 	if err != nil {
 		return &http.Response{}, err
 	}
-	return http.Post(url, "application/json", bytes.NewReader(jsonStr))
+	resp, err := client.Do(req)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	defer resp.Body.Close()
+	return resp, nil
+}
+
+func PostURL(url string, bodyData map[string]any) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := GetRequest(url, "POST", bodyData)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	defer resp.Body.Close()
+	return resp, nil
+}
+
+func DeleteURL(url string) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := GetRequest(url, "DELETE", nil)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	defer resp.Body.Close()
+	return resp, nil
+}
+
+func GetRequest(url string, option string, bodyData map[string]any) (*http.Request, error) {
+	if bodyData == nil {
+		bodyData = make(map[string]any)
+	}
+	jsonStr, err := json.Marshal(bodyData)
+	if err != nil {
+		return &http.Request{}, err
+	}
+	req, err := http.NewRequest(option, url, bytes.NewReader(jsonStr))
+	if err != nil {
+		return &http.Request{}, err
+	}
+	return req, err
 }
