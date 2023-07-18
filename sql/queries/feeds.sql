@@ -5,8 +5,9 @@ INSERT INTO feeds(
     url,
     created_at,
     updated_at,
+    last_fetched_at,
     user_id
-) VALUES ($1, $2, $3, $4, $5, $6)
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *;
 
 -- name: GetFeeds :many

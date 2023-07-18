@@ -97,10 +97,10 @@ func (dbconfig *dbConfig) GetAllFeedsHandle(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if len(feeds) == 0 {
-		RespondWithJSON(w, http.StatusOK, []database.Feed{})
+		RespondWithJSON(w, http.StatusOK, []objects.ResponseBodyFeed{})
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, feeds)
+	RespondWithJSON(w, http.StatusOK, DatabaseToFeeds(feeds))
 }
 
 // creates a feed for a specific user
@@ -119,7 +119,7 @@ func (dbconfig *dbConfig) CreateFeedHandler(w http.ResponseWriter, r *http.Reque
 		RespondWithError(w, http.StatusConflict, err.Error())
 		return
 	}
-	feeds, err := dbconfig.DB.CreateFeed(r.Context(), database.CreateFeedParams{
+	feed, err := dbconfig.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		Name:      params.Name,
 		Url:       params.URL,
@@ -133,16 +133,16 @@ func (dbconfig *dbConfig) CreateFeedHandler(w http.ResponseWriter, r *http.Reque
 	}
 	feed_followed, err := dbconfig.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
-		FeedID:    feeds.ID,
+		FeedID:    feed.ID,
 		UserID:    dbUser.ID,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
 	response := struct {
-		Feed       database.Feed       `json:"feed"`
-		FeedFollow database.FeedFollow `json:"feed_follow"`
+		Feed       objects.ResponseBodyFeed `json:"feed"`
+		FeedFollow database.FeedFollow      `json:"feed_follow"`
 	}{
-		Feed:       feeds,
+		Feed:       DatabaseToFeed(feed),
 		FeedFollow: feed_followed,
 	}
 	if err != nil {

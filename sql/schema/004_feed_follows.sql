@@ -1,5 +1,5 @@
 -- +goose Up
-create table feed_follows(
+CREATE TABLE feed_follows(
     id UUID PRIMARY KEY,
     feed_id UUID NOT NULL,
     user_id UUID NOT NULL,
