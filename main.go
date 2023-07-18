@@ -2,6 +2,7 @@ package main
 
 import (
 	"blog/internal/database"
+	"fetch"
 	"log"
 	"net/http"
 	"utils"
@@ -16,6 +17,7 @@ type dbConfig struct {
 }
 
 func main() {
+	fetch.FetchFeed("https://blog.boot.dev/index.xml")
 	r := chi.NewRouter()
 	r.Use(cors.Handler(MiddleWare()))
 
