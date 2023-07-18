@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"objects"
 	"time"
+	"utils"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -14,6 +15,20 @@ import (
 )
 
 // v1 handlers
+
+// handler to test new Handler
+func (dbconfig *dbConfig) TestNewHandle(w http.ResponseWriter, r *http.Request) {
+	feedID, _ := uuid.Parse("256a6b8f-fcbc-4b5d-b82c-74be0ff916bd")
+	feeds, err := dbconfig.DB.MarkFeedFetched(r.Context(), database.MarkFeedFetchedParams{
+		LastFetchedAt: utils.ConvertTimeSQL(time.Now().UTC()),
+		ID:            feedID,
+	})
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseToFeed(feeds))
+}
 
 // returns all feeds followed by a user
 func (dbconfig *dbConfig) GetFeedFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
@@ -97,10 +112,10 @@ func (dbconfig *dbConfig) GetAllFeedsHandle(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if len(feeds) == 0 {
-		RespondWithJSON(w, http.StatusOK, []database.Feed{})
+		RespondWithJSON(w, http.StatusOK, []objects.ResponseBodyFeed{})
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, feeds)
+	RespondWithJSON(w, http.StatusOK, DatabaseToFeeds(feeds))
 }
 
 // creates a feed for a specific user
@@ -119,7 +134,7 @@ func (dbconfig *dbConfig) CreateFeedHandler(w http.ResponseWriter, r *http.Reque
 		RespondWithError(w, http.StatusConflict, err.Error())
 		return
 	}
-	feeds, err := dbconfig.DB.CreateFeed(r.Context(), database.CreateFeedParams{
+	feed, err := dbconfig.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		Name:      params.Name,
 		Url:       params.URL,
@@ -133,16 +148,16 @@ func (dbconfig *dbConfig) CreateFeedHandler(w http.ResponseWriter, r *http.Reque
 	}
 	feed_followed, err := dbconfig.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
-		FeedID:    feeds.ID,
+		FeedID:    feed.ID,
 		UserID:    dbUser.ID,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
 	response := struct {
-		Feed       database.Feed       `json:"feed"`
-		FeedFollow database.FeedFollow `json:"feed_follow"`
+		Feed       objects.ResponseBodyFeed `json:"feed"`
+		FeedFollow database.FeedFollow      `json:"feed_follow"`
 	}{
-		Feed:       feeds,
+		Feed:       DatabaseToFeed(feed),
 		FeedFollow: feed_followed,
 	}
 	if err != nil {

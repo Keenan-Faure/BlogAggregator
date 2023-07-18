@@ -2,6 +2,8 @@ package objects
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreateFeedParam struct {
@@ -14,6 +16,16 @@ type CreateUserParam struct {
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Name      string `json:"name"`
+}
+
+type ResponseBodyFeed struct {
+	ID            uuid.UUID `json:"id"`
+	Name          string    `json:"name"`
+	Url           string    `json:"url"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	UserID        uuid.UUID `json:"user_id"`
+	LastFetchedAt time.Time `json:"last_fetched_at"`
 }
 
 type RequestBodyUser struct {

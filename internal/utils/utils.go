@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"database/sql"
 	"errors"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -26,4 +28,18 @@ func ExtractAPIKey(authString string) (string, error) {
 		return "", errors.New("malformed second part of authentication")
 	}
 	return authString[7:], nil
+}
+
+// convert time.Time to sql.NullTime
+func ConvertTimeSQL(time time.Time) sql.NullTime {
+	if time.IsZero() {
+		return sql.NullTime{
+			Time:  time,
+			Valid: false,
+		}
+	}
+	return sql.NullTime{
+		Time:  time,
+		Valid: true,
+	}
 }
