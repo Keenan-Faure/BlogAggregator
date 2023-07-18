@@ -4,10 +4,11 @@ A Blog Aggregator that fetches data from remote sources
 
 ## Main Features
 
--   Building a RESTful API in Go, and you'll
--   Uses production-ready database tools like [PostgreSQL](https://www.postgresql.org), (SQLc)[https://sqlc.dev], [Goose](https://github.com/pressly/goose), and [pgAdmin](https://www.pgadmin.org)
--   Database migration
+-   Building a RESTful API in Go
+-   Uses production-ready database tools like [PostgreSQL](https://www.postgresql.org), [SQLc](https://sqlc.dev), [Goose](https://github.com/pressly/goose), and [pgAdmin](https://www.pgadmin.org)
+-   Database migration using goose
 -   Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
+-   Fetching and encoding of xml RSS feeds
 
 ## Prerequistes
 
