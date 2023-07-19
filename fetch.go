@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"objects"
+	"strings"
 	"sync"
 	"time"
 	"utils"
@@ -75,7 +76,6 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 		return
 	}
 	for _, value := range rssfeed.Channel.Item {
-		log.Println("URL:", value.Link)
 		_, err := dbconfig.DB.CreatePost(context.Background(), database.CreatePostParams{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now().UTC(),
@@ -87,7 +87,9 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 			FeedID:      feed.ID,
 		})
 		if err != nil {
-			log.Println("Error inserting post into database:", err)
+			if strings.ReplaceAll(err.Error(), "\"", "") != "pq: duplicate key value violates unique constraint posts_url_key" {
+				log.Println("Error inserting post into database:", err)
+			}
 		}
 	}
 
