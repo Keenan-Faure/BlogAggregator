@@ -43,3 +43,8 @@ func ConvertTimeSQL(time time.Time) sql.NullTime {
 		Valid: true,
 	}
 }
+
+// checks if a string contains certain characters word
+func CheckStringWithWord(sentence, word string) bool {
+	return strings.Contains(sentence, word)
+}

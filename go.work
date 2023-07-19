@@ -2,7 +2,7 @@ go 1.20
 
 use (
 	.
-	./fetch
+	./internal/fetch
 	./internal/docs
 	./internal/objects
 	./internal/utils
