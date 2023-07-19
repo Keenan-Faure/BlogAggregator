@@ -68,3 +68,16 @@ Where `CONN` is the connection string for your database which follow the format:
 ```
 protocol://username:password@host:port/database
 ```
+
+## API Documentation
+
+| Endpoint                          | Description                      | HTTP Method | Authorization               | Params         | Format                                       |
+| --------------------------------- | :------------------------------- | ----------- | --------------------------- | -------------- | -------------------------------------------- |
+| `/v1/readiness`                   | Returns the status of the API    | GET         | N/A                         |                |                                              |
+| `/v1/err`                         | Returns an internal server error | GET         | N/A                         |                |                                              |
+| `/v1/users`                       | Returns user information         | GET         | Authorization: ApiKey <key> |                |                                              |
+| `/v1/users`                       | Creates a new user               | POST        | N/A                         |                | `json{"name": "UserName"}`                   |
+| `/v1/feeds`                       | Gets all feeds                   | GET         | N/A                         |                |                                              |
+| `/v1/feeds`                       | Creates a new feed               | POST        | Authorization: ApiKey <key> |                | `json{"name": "FeedName", "url": "FeedURL"}` |
+| `/v1/feed_follows`                | Follows a feed                   | POST        | Authorization: ApiKey <key> |                | `json{"feed_id": "FeedID"}`                  |
+| `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                 | DELETE      | N/A                         | `feedFollowID` |                                              |
