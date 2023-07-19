@@ -9,6 +9,7 @@ A Blog Aggregator that fetches data from remote sources
 -   Database migration using goose
 -   Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
 -   Fetching and encoding of xml RSS feeds
+-   Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
 
 ## Prerequistes
 

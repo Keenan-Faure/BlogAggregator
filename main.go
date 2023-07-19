@@ -2,7 +2,6 @@ package main
 
 import (
 	"blog/internal/database"
-	"fetch"
 	"log"
 	"net/http"
 	"utils"
@@ -17,7 +16,6 @@ type dbConfig struct {
 }
 
 func main() {
-	fetch.FetchFeed("https://blog.boot.dev/index.xml")
 	r := chi.NewRouter()
 	r.Use(cors.Handler(MiddleWare()))
 
@@ -27,6 +25,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	FetchWorker(dbconfig)
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
@@ -41,6 +41,9 @@ func main() {
 	r.Mount("/v1", v1)
 
 	port := utils.LoadEnv("port")
+	if port == "" {
+		log.Fatal("Port not defined in Environment")
+	}
 
 	server := &http.Server{
 		Addr:    ":" + port,

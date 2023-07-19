@@ -23,7 +23,8 @@ WHERE "url" = $1;
 
 -- name: GetNextFeedsToFetch :many
 SELECT * FROM feeds
-ORDER BY last_fetched_at DESC;
+ORDER BY last_fetched_at DESC
+LIMIT $1;
 
 -- name: MarkFeedFetched :one
 UPDATE feeds
