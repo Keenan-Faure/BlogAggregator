@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"objects"
 	"time"
-	"utils"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -17,18 +16,19 @@ import (
 // v1 handlers
 
 // handler to test new Handler
-func (dbconfig *dbConfig) TestNewHandle(w http.ResponseWriter, r *http.Request) {
-	feedID, _ := uuid.Parse("256a6b8f-fcbc-4b5d-b82c-74be0ff916bd")
-	feeds, err := dbconfig.DB.MarkFeedFetched(r.Context(), database.MarkFeedFetchedParams{
-		LastFetchedAt: utils.ConvertTimeSQL(time.Now().UTC()),
-		ID:            feedID,
-	})
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	RespondWithJSON(w, http.StatusOK, DatabaseToFeed(feeds))
-}
+// func (dbconfig *dbConfig) TestNewHandle(w http.ResponseWriter, r *http.Request) {
+// 	params, err := DecodePostRequestBody(r)
+// 	if err != nil {
+// 		RespondWithError(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
+
+// 	if err != nil {
+// 		RespondWithError(w, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
+// 	RespondWithJSON(w, http.StatusOK, posts)
+// }
 
 // returns all feeds followed by a user
 func (dbconfig *dbConfig) GetFeedFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {

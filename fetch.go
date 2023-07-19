@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 	"utils"
+
+	"github.com/google/uuid"
 )
 
 const fetch_time = 60 * time.Second //60 seconds
@@ -73,8 +75,23 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 		return
 	}
 	for _, value := range rssfeed.Channel.Item {
-		log.Printf("Found post %s", value.Title)
+		log.Println("URL:", value.Link)
+		_, err := dbconfig.DB.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       value.Title,
+			Url:         value.Link,
+			Description: value.Description,
+			PublishedAt: value.PubDate,
+			FeedID:      feed.ID,
+		})
+		if err != nil {
+			log.Println("Error inserting post into database:", err)
+		}
 	}
+
+	// add posts to database
 }
 
 // loop function that uses Goroutines to run

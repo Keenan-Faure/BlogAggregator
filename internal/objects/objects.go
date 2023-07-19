@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +17,13 @@ type CreateUserParam struct {
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Name      string `json:"name"`
+}
+
+type CreatePostParams struct {
+	Title       string         `json:"title"`
+	Url         string         `json:"url"`
+	Description sql.NullString `json:"description"`
+	PublishedAt sql.NullTime   `json:"published_at"`
 }
 
 type ResponseBodyFeed struct {
@@ -84,8 +92,8 @@ type RSS struct {
 }
 
 type RSSItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	PubDate     string `xml:"pubDate"`
-	Description string `xml:"description"`
+	Title       string         `xml:"title"`
+	Link        string         `xml:"link"`
+	PubDate     sql.NullTime   `xml:"pubDate"`
+	Description sql.NullString `xml:"description"`
 }

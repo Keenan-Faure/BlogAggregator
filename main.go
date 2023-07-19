@@ -30,7 +30,7 @@ func main() {
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
-	v1.Get("/test_handle", dbconfig.TestNewHandle)
+	// v1.Get("/test_handle", dbconfig.TestNewHandle)
 	v1.Get("/users", dbconfig.middlewareAuth(dbconfig.GetUserByApiKeyHandle))
 	v1.Post("/users", dbconfig.CreateUserHandle)
 	v1.Post("/feed", dbconfig.middlewareAuth(dbconfig.CreateFeedHandler))

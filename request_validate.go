@@ -66,3 +66,14 @@ func FeedFollowValidation(feed objects.RequestBodyFeedFollow) error {
 	}
 	return nil
 }
+
+// Posts: decode the request body
+func DecodePostRequestBody(r *http.Request) (objects.CreatePostParams, error) {
+	decoder := json.NewDecoder(r.Body)
+	params := objects.CreatePostParams{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		return params, err
+	}
+	return params, nil
+}
