@@ -36,6 +36,17 @@ type ResponseBodyFeed struct {
 	LastFetchedAt time.Time `json:"last_fetched_at"`
 }
 
+type ResponseBodyPosts struct {
+	ID          uuid.UUID `json:"id"`
+	FeedID      uuid.UUID `json:"feed_id"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	PublishedAt time.Time `json:"published_at"`
+}
+
 type RequestBodyUser struct {
 	Name string `json:"name"`
 }
@@ -92,8 +103,8 @@ type RSS struct {
 }
 
 type RSSItem struct {
-	Title       string         `xml:"title"`
-	Link        string         `xml:"link"`
-	PubDate     sql.NullTime   `xml:"pubDate"`
-	Description sql.NullString `xml:"description"`
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	Description string `xml:"description"`
 }

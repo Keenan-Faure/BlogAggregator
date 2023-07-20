@@ -82,6 +82,19 @@ func createRoutes() map[string]objects.Route {
 			Format:        []string{},
 			Authorization: "None",
 		},
+		"GET /v1/posts": {
+			Description: "Displays posts followed by a user",
+			Supports:    []string{"GET"},
+			Params: map[string]objects.Params{
+				"limit": {
+					Key:   "limit",
+					Value: "",
+				},
+			},
+			AcceptsData:   false,
+			Format:        []string{},
+			Authorization: "Authorization: ApiKey <key>",
+		},
 	}
 	return routes
 }

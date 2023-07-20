@@ -26,8 +26,6 @@ func FetchWorker(dbconfig dbConfig) {
 
 // fetches feed(s) from a url
 func FetchFeed(url string) (objects.RSS, error) {
-	// some XML feeds dont have a .xml extension
-
 	// if !utils.CheckStringWithWord(url, ".xml") {
 	// 	return objects.RSS{}, errors.New("unable to parse non-xml feed")
 	// }
@@ -48,7 +46,7 @@ func FetchFeed(url string) (objects.RSS, error) {
 	return result, nil
 }
 
-// processes the feeds
+// processes the feeds (loop)
 func ProcessFeeds(dbconfig dbConfig, feeds []database.Feed) {
 	wg := &sync.WaitGroup{}
 	for _, value := range feeds {
@@ -58,7 +56,7 @@ func ProcessFeeds(dbconfig dbConfig, feeds []database.Feed) {
 	wg.Wait()
 }
 
-// processes feed
+// processes feed (single)
 func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 	defer wg.Done()
 	_, err := dbconfig.DB.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
@@ -82,21 +80,20 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 			UpdatedAt:   time.Now().UTC(),
 			Title:       value.Title,
 			Url:         value.Link,
-			Description: value.Description,
-			PublishedAt: value.PubDate,
+			Description: utils.ConvertStringToSQL(value.Description),
+			PublishedAt: utils.ConvertStringToTime(value.PubDate),
 			FeedID:      feed.ID,
 		})
 		if err != nil {
 			if strings.ReplaceAll(err.Error(), "\"", "") != "pq: duplicate key value violates unique constraint posts_url_key" {
-				log.Println("Error inserting post into database:", err)
+				log.Println("Error creating post:", err)
 			}
 		}
 	}
-
-	// add posts to database
+	log.Printf("Feed %s collected, %d posts found", feed.Name, len(rssfeed.Channel.Item))
 }
 
-// loop function that uses Goroutines to run
+// loop function that uses Goroutine to run
 // a function each interval
 func Reaploop(dbconfig dbConfig, interval time.Duration) {
 	ticker := time.NewTicker(interval)

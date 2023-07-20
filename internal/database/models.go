@@ -36,7 +36,7 @@ type Post struct {
 	Title       string         `json:"title"`
 	Url         string         `json:"url"`
 	Description sql.NullString `json:"description"`
-	PublishedAt sql.NullTime   `json:"published_at"`
+	PublishedAt time.Time      `json:"published_at"`
 	FeedID      uuid.UUID      `json:"feed_id"`
 }
 

@@ -10,6 +10,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const time_format = time.RFC1123Z
+
 func LoadEnv(key string) string {
 	godotenv.Load()
 	value := os.Getenv(strings.ToUpper(key))
@@ -31,16 +33,39 @@ func ExtractAPIKey(authString string) (string, error) {
 }
 
 // convert time.Time to sql.NullTime
-func ConvertTimeSQL(time time.Time) sql.NullTime {
-	if time.IsZero() {
+func ConvertTimeSQL(timeValue time.Time) sql.NullTime {
+	if timeValue.IsZero() {
 		return sql.NullTime{
-			Time:  time,
+			Time:  timeValue,
 			Valid: false,
 		}
 	}
 	return sql.NullTime{
-		Time:  time,
+		Time:  timeValue,
 		Valid: true,
+	}
+}
+
+// converts a string to time.Time using time_format
+func ConvertStringToTime(timeString string) time.Time {
+	timeValue, err := time.Parse(time_format, timeString)
+	if err != nil {
+		return time.Time{}
+	}
+	return timeValue
+}
+
+// converts a string to a sql.NullString object
+func ConvertStringToSQL(description string) sql.NullString {
+	if description == "" {
+		return sql.NullString{
+			String: "",
+			Valid:  false,
+		}
+	}
+	return sql.NullString{
+		String: description,
+		Valid:  true,
 	}
 }
 

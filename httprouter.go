@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"objects"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -15,20 +16,26 @@ import (
 
 // v1 handlers
 
-// handler to test new Handler
-// func (dbconfig *dbConfig) TestNewHandle(w http.ResponseWriter, r *http.Request) {
-// 	params, err := DecodePostRequestBody(r)
-// 	if err != nil {
-// 		RespondWithError(w, http.StatusBadRequest, err.Error())
-// 		return
-// 	}
-
-// 	if err != nil {
-// 		RespondWithError(w, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	RespondWithJSON(w, http.StatusOK, posts)
-// }
+// returns all posts followed by a user
+func (dbconfig *dbConfig) GetPostFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil {
+		limit = 10
+	}
+	posts, err := dbconfig.DB.GetPostsByUser(r.Context(), database.GetPostsByUserParams{
+		Limit:  int32(limit),
+		UserID: dbUser.ID,
+	})
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(posts) == 0 {
+		RespondWithJSON(w, http.StatusOK, []database.Post{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseToPosts(posts))
+}
 
 // returns all feeds followed by a user
 func (dbconfig *dbConfig) GetFeedFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
