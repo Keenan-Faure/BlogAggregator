@@ -34,3 +34,21 @@ func DatabaseToFeed(feed database.Feed) objects.ResponseBodyFeed {
 		LastFetchedAt: feed.LastFetchedAt.Time,
 	}
 }
+
+// converts a database.Posts into objects.ResponseBodyPosts
+func DatabaseToPosts(feeds []database.Post) []objects.ResponseBodyPosts {
+	response := []objects.ResponseBodyPosts{}
+	for _, value := range feeds {
+		response = append(response, objects.ResponseBodyPosts{
+			ID:          value.ID,
+			FeedID:      value.FeedID,
+			Url:         value.Url,
+			Title:       value.Title,
+			Description: value.Description.String,
+			CreatedAt:   value.CreatedAt,
+			UpdatedAt:   value.UpdatedAt,
+			PublishedAt: value.PublishedAt,
+		})
+	}
+	return response
+}
