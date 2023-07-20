@@ -82,3 +82,21 @@ protocol://username:password@host:port/database
 | `/v1/feed_follows`                | Follows a feed                    | POST        | Authorization: ApiKey <key> |         | `json{"feed_id": "FeedID"}`                  |
 | `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                  | DELETE      | N/A                         |         |                                              |
 | `/v1/posts`                       | Displays posts followed by a user | GET         | Authorization: ApiKey <key> | `limit` |                                              |
+
+## Extensions (2 weeks extra)
+
+-   Support pagination of the endpoints that can return many items
+    -   Use query params to allow the user to select which page they wish to see
+    -   `?page=1`
+    -   Each page can have a limit of 10 `LIMIT $1 OFFSET $(PageNumber * 10)`
+-   Support different options for sorting and filtering posts using query parameters
+    -   Add a search that searches for the post/feed (title)
+-   Add support for other types of feeds (e.g. Atom, JSON, etc.) (WooCommerce)
+    -   JSON product data when authenticated (WooCommerce) can scrape product data to add to the website
+-   Add integration tests that use the API to create, read, update, and delete feeds and posts
+    -   Will be used in the webUI
+-   Create a simple web UI that uses your backend API
+    -   Landing page containing Navbar (Products, Feeds, Posts, Followed, Liked, bookmarked)
+    -   Little CSS mostly HTML
+-   Add bookmarking or "liking" to posts
+    -   Add extra table that marks which user liked or book marked feeds/posts
