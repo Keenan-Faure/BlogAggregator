@@ -34,10 +34,12 @@ func main() {
 	v1.Post("/users", dbconfig.CreateUserHandle)
 	v1.Post("/feed", dbconfig.middlewareAuth(dbconfig.CreateFeedHandler))
 	v1.Get("/feed", dbconfig.GetAllFeedsHandle)
+	v1.Get("/feed_search", dbconfig.SearchFeedHandle)
 	v1.Get("/feed_follows", dbconfig.middlewareAuth(dbconfig.GetFeedFollowHandle))
 	v1.Post("/feed_follows", dbconfig.middlewareAuth(dbconfig.CreateFeedFollowHandle))
 	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.UnFollowFeedHandle)
 	v1.Get("/posts", dbconfig.middlewareAuth(dbconfig.GetPostFollowHandle))
+	v1.Get("/posts_search", dbconfig.SearchPostHandle)
 	v1.Get("/", dbconfig.Endpoints)
 	r.Mount("/v1", v1)
 

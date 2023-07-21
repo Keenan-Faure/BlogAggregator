@@ -99,6 +99,78 @@ func (q *Queries) GetFeedByURL(ctx context.Context, url string) (Feed, error) {
 	return i, err
 }
 
+const getFeedSearchName = `-- name: GetFeedSearchName :many
+SELECT id, name, url, created_at, updated_at, user_id, last_fetched_at FROM feeds WHERE "name"
+SIMILAR TO $1
+`
+
+func (q *Queries) GetFeedSearchName(ctx context.Context, similarToEscape string) ([]Feed, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedSearchName, similarToEscape)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Feed
+	for rows.Next() {
+		var i Feed
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Url,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.LastFetchedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFeedSearchUrl = `-- name: GetFeedSearchUrl :many
+SELECT id, name, url, created_at, updated_at, user_id, last_fetched_at FROM feeds WHERE "url"
+SIMILAR TO $1
+`
+
+func (q *Queries) GetFeedSearchUrl(ctx context.Context, similarToEscape string) ([]Feed, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedSearchUrl, similarToEscape)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Feed
+	for rows.Next() {
+		var i Feed
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Url,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.LastFetchedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFeedsAsc = `-- name: GetFeedsAsc :many
 SELECT id, name, url, created_at, updated_at, user_id, last_fetched_at FROM feeds
 ORDER BY updated_at ASC

@@ -28,3 +28,7 @@ ON posts.feed_id = feed_follows.feed_id
 WHERE feed_follows.user_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: GetPostSearchTitle :many
+SELECT * FROM posts WHERE "title"
+SIMILAR TO $1;

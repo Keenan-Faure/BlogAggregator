@@ -11,6 +11,10 @@ A Blog Aggregator that fetches data from remote sources
 - Fetching and encoding of xml RSS feeds
 - Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
 
+### Extensions added
+
+- Supports pagination of the endpoints that can return many items. Visit docs in `README.md` for more information.
+
 ## Prerequistes
 
 ### Install POSTGRESQL and check if install was successful
@@ -90,7 +94,7 @@ protocol://username:password@host:port/database
   - `?page=1`
   - Each page can have a limit of 10 `LIMIT $1 OFFSET $(PageNumber * 10)`
 - Support different options for sorting and filtering posts using query parameters
-  - Add a search that searches for the post/feed (title)
+  - Add a search that searches for the post/feed (title, name, url, description)
 - Add support for other types of feeds (e.g. Atom, JSON, etc.) (WooCommerce)
   - JSON product data when authenticated (WooCommerce) can scrape product data to add to the website
 - Add integration tests that use the API to create, read, update, and delete feeds and posts

@@ -19,6 +19,44 @@ import (
 
 // v1 handlers
 
+// Searches the database for simular feeds
+func (dbconfig *dbConfig) SearchFeedHandle(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("q")
+	feeds, err := dbconfig.DB.GetFeedSearchName(r.Context(), utils.AddSearchChar(search))
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithJSON(w, http.StatusInternalServerError, []string{})
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(feeds) == 0 {
+		RespondWithJSON(w, http.StatusOK, []database.Feed{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, feeds)
+}
+
+// Searches the database for simular posts
+func (dbconfig *dbConfig) SearchPostHandle(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("q")
+	posts, err := dbconfig.DB.GetPostSearchTitle(r.Context(), utils.AddSearchChar(search))
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithJSON(w, http.StatusInternalServerError, []string{})
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(posts) == 0 {
+		RespondWithJSON(w, http.StatusOK, []database.Post{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseToPosts(posts))
+}
+
 // returns all posts followed by a user
 func (dbconfig *dbConfig) GetPostFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))

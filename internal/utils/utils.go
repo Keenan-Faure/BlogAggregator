@@ -81,3 +81,8 @@ func FindSortParam(sortParam string) string {
 	}
 	return "desc"
 }
+
+// adds the % character around the param string
+func AddSearchChar(searchParam string) string {
+	return "%(" + searchParam + ")%"
+}

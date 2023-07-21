@@ -40,3 +40,7 @@ last_fetched_at = $1,
 updated_at = $1
 WHERE id = $2
 RETURNING *;
+
+-- name: GetFeedSearchName :many
+SELECT * FROM feeds WHERE "name"
+SIMILAR TO $1;
