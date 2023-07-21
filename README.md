@@ -77,15 +77,17 @@ protocol://username:password@host:port/database
 
 | Endpoint                          | Description                       | HTTP Method | Authorization | Params                         | Format                                       |
 | --------------------------------- | :-------------------------------- | ----------- | ------------- | ------------------------------ | -------------------------------------------- |
-| `/v1/readiness`                   | Returns the status of the API     | GET         | N/A           |                                |                                              |
-| `/v1/err`                         | Returns an internal server error  | GET         | N/A           |                                |                                              |
+| `/v1/readiness`                   | Returns the status of the API     | GET         |               |                                |                                              |
+| `/v1/err`                         | Returns an internal server error  | GET         |               |                                |                                              |
 | `/v1/users`                       | Returns user information          | GET         | ApiKey <key>  |                                |                                              |
-| `/v1/users`                       | Creates a new user                | POST        | N/A           |                                | `json{"name": "UserName"}`                   |
-| `/v1/feeds`                       | Gets all feeds                    | GET         | N/A           | `page={pageNum}&sort={method}` |                                              |
+| `/v1/users`                       | Creates a new user                | POST        |               |                                | `json{"name": "UserName"}`                   |
+| `/v1/feeds`                       | Gets all feeds                    | GET         |               | `page={pageNum}&sort={method}` |                                              |
 | `/v1/feeds`                       | Creates a new feed                | POST        | ApiKey <key>  |                                | `json{"name": "FeedName", "url": "FeedURL"}` |
 | `/v1/feed_follows`                | Follows a feed                    | POST        | ApiKey <key>  |                                | `json{"feed_id": "FeedID"}`                  |
-| `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                  | DELETE      | N/A           |                                |                                              |
+| `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                  | DELETE      |               |                                |                                              |
 | `/v1/posts`                       | Displays posts followed by a user | GET         | ApiKey <key>  | `page={pageNum}&sort={method}` |                                              |
+| `/v1/feed_search`                 | Searches for a feed by name       | POST        |               | `q={FeedName}`                 |                                              |
+| `/v1/post_search`                 | Searches for a post by title      | POST        |               | `q={PostTitle}`                |                                              |
 
 ## Extensions (2 weeks extra)
 

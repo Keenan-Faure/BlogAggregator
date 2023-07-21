@@ -108,6 +108,32 @@ func createRoutes() map[string]objects.Route {
 			Format:        []string{},
 			Authorization: "Authorization: ApiKey <key>",
 		},
+		"GET /v1/posts_search": {
+			Description: "Searches for a post by title",
+			Supports:    []string{"GET"},
+			Params: map[string]objects.Params{
+				"page": {
+					Key:   "page",
+					Value: "PostTitle",
+				},
+			},
+			AcceptsData:   false,
+			Format:        []string{},
+			Authorization: "None",
+		},
+		"GET /v1/feed_search": {
+			Description: "Searches for a feed by name",
+			Supports:    []string{"GET"},
+			Params: map[string]objects.Params{
+				"q": {
+					Key:   "q",
+					Value: "FeedName",
+				},
+			},
+			AcceptsData:   false,
+			Format:        []string{},
+			Authorization: "None",
+		},
 	}
 	return routes
 }
