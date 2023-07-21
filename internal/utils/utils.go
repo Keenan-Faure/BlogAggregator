@@ -73,3 +73,11 @@ func ConvertStringToSQL(description string) sql.NullString {
 func CheckStringWithWord(sentence, word string) bool {
 	return strings.Contains(sentence, word)
 }
+
+// determines which sorting method to use based on query param
+func FindSortParam(sortParam string) string {
+	if sortParam != strings.ToLower("asc") {
+		return "acs"
+	}
+	return "desc"
+}

@@ -2,12 +2,15 @@ package main
 
 import (
 	"blog/internal/database"
+	"docs"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"objects"
 	"strconv"
 	"time"
+	"utils"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -18,14 +21,12 @@ import (
 
 // returns all posts followed by a user
 func (dbconfig *dbConfig) GetPostFollowHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		limit = 10
+		page = 1
+		log.Println("Error decoding page param")
 	}
-	posts, err := dbconfig.DB.GetPostsByUser(r.Context(), database.GetPostsByUserParams{
-		Limit:  int32(limit),
-		UserID: dbUser.ID,
-	})
+	posts, err := SortingQueryPost(r, *dbconfig, page, dbUser)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -113,7 +114,12 @@ func (dbconfig *dbConfig) CreateFeedFollowHandle(w http.ResponseWriter, r *http.
 
 // GETs all feeds from the database
 func (dbconfig *dbConfig) GetAllFeedsHandle(w http.ResponseWriter, r *http.Request) {
-	feeds, err := dbconfig.DB.GetFeeds(r.Context())
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+		log.Println("Error decoding page param:", err)
+	}
+	feeds, err := SortingQueryFeed(r, *dbconfig, page)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -190,13 +196,11 @@ func (dbconfig *dbConfig) CreateUserHandle(w http.ResponseWriter, r *http.Reques
 		RespondWithError(w, http.StatusBadRequest, "data validation error")
 		return
 	}
-
 	_, err = dbconfig.CheckUserExist(params.Name, r)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	dbUser, err := dbconfig.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
@@ -208,6 +212,11 @@ func (dbconfig *dbConfig) CreateUserHandle(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	RespondWithJSON(w, http.StatusCreated, dbUser)
+}
+
+// Displays available endpoints in json format
+func (dbconfig *dbConfig) Endpoints(w http.ResponseWriter, r *http.Request) {
+	RespondWithJSON(w, http.StatusOK, docs.Endpoints())
 }
 
 // test for RespondWithJSON
@@ -329,4 +338,40 @@ func SQLErrorWrapper(err error) error {
 		return errors.New("could not find record")
 	}
 	return err
+}
+
+// helper function
+func SortingQueryFeed(r *http.Request, dbconfig dbConfig, page int) ([]database.Feed, error) {
+	sort := r.URL.Query().Get("sort")
+	if utils.FindSortParam(sort) == "acs" {
+		feeds, err := dbconfig.DB.GetFeedsAsc(r.Context(), database.GetFeedsAscParams{
+			Limit:  10,
+			Offset: int32((page - 1) * 10),
+		})
+		return feeds, err
+	}
+	feeds, err := dbconfig.DB.GetFeedsDesc(r.Context(), database.GetFeedsDescParams{
+		Limit:  10,
+		Offset: int32((page - 1) * 10),
+	})
+	return feeds, err
+}
+
+// helper function
+func SortingQueryPost(r *http.Request, dbconfig dbConfig, page int, dbUser database.User) ([]database.Post, error) {
+	sort := r.URL.Query().Get("sort")
+	if utils.FindSortParam(sort) == "acs" {
+		posts, err := dbconfig.DB.GetPostsByUserAsc(r.Context(), database.GetPostsByUserAscParams{
+			Limit:  10,
+			Offset: int32((page - 1) * 10),
+			UserID: dbUser.ID,
+		})
+		return posts, err
+	}
+	posts, err := dbconfig.DB.GetPostsByUserDesc(r.Context(), database.GetPostsByUserDescParams{
+		Limit:  10,
+		Offset: int32((page - 1) * 10),
+		UserID: dbUser.ID,
+	})
+	return posts, err
 }

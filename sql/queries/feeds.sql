@@ -10,8 +10,15 @@ INSERT INTO feeds(
 ) VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *;
 
--- name: GetFeeds :many
-SELECT * FROM feeds;
+-- name: GetFeedsAsc :many
+SELECT * FROM feeds
+ORDER BY updated_at ASC
+LIMIT $1 OFFSET $2;
+
+-- name: GetFeedsDesc :many
+SELECT * FROM feeds
+ORDER BY updated_at DESC
+LIMIT $1 OFFSET $2;
 
 -- name: GetFeed :one
 SELECT * FROM feeds

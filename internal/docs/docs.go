@@ -59,9 +59,18 @@ func createRoutes() map[string]objects.Route {
 			Authorization: "Authorization: ApiKey <key>",
 		},
 		"GET /v1/feeds": {
-			Description:   "Gets all feeds",
-			Supports:      []string{"GET"},
-			Params:        map[string]objects.Params{},
+			Description: "Gets all feeds",
+			Supports:    []string{"GET"},
+			Params: map[string]objects.Params{
+				"page": {
+					Key:   "page",
+					Value: "",
+				},
+				"sort": {
+					Key:   "sort",
+					Value: "ascs, desc",
+				},
+			},
 			AcceptsData:   false,
 			Format:        []string{},
 			Authorization: "None",
@@ -86,9 +95,13 @@ func createRoutes() map[string]objects.Route {
 			Description: "Displays posts followed by a user",
 			Supports:    []string{"GET"},
 			Params: map[string]objects.Params{
-				"limit": {
-					Key:   "limit",
+				"page": {
+					Key:   "page",
 					Value: "",
+				},
+				"sort": {
+					Key:   "sort",
+					Value: "ascs, desc",
 				},
 			},
 			AcceptsData:   false,

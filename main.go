@@ -38,6 +38,7 @@ func main() {
 	v1.Post("/feed_follows", dbconfig.middlewareAuth(dbconfig.CreateFeedFollowHandle))
 	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.UnFollowFeedHandle)
 	v1.Get("/posts", dbconfig.middlewareAuth(dbconfig.GetPostFollowHandle))
+	v1.Get("/", dbconfig.Endpoints)
 	r.Mount("/v1", v1)
 
 	port := utils.LoadEnv("port")
