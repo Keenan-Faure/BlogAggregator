@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestLoadEnv(t *testing.T) {
@@ -32,5 +33,31 @@ func TestExtractApiKey(t *testing.T) {
 	actual, err = ExtractAPIKey(expected)
 	if err != nil {
 		t.Errorf("Expected 'nil' but found " + actual)
+	}
+}
+
+func TestConvertTimeSQL(t *testing.T) {
+	fmt.Println("Test Case 1 - zero time value")
+	sqlTime := ConvertTimeSQL(time.Time{})
+	if sqlTime.Valid {
+		t.Errorf("Expecting 'false' but found 'true'")
+	}
+	fmt.Println("Test Case 2 - valid time value")
+	sqlTime = ConvertTimeSQL(time.Now().UTC())
+	if !sqlTime.Valid {
+		t.Errorf("Expecting 'true' but found 'false'")
+	}
+}
+
+func TestConvertStringToTime(t *testing.T) {
+	fmt.Println("Test Case 1 - invalid time value")
+	sqlTime := ConvertStringToTime("")
+	if !sqlTime.IsZero() {
+		t.Errorf("Expecting 'true' but found 'false'")
+	}
+	fmt.Println("Test Case 2 - valid time value")
+	sqlTime = ConvertStringToTime("Sun, 23 Jul 2023 10:00:48 +0000")
+	if sqlTime.IsZero() {
+		t.Errorf("Expecting 'false' but found 'true'")
 	}
 }
