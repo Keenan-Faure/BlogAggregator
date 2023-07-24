@@ -92,6 +92,7 @@ type Params struct {
 }
 
 // Fetch RSS Feed structure
+
 type RSS struct {
 	Channel struct {
 		Title       string    `xml:"title"`
@@ -107,4 +108,38 @@ type RSSItem struct {
 	Link        string `xml:"link"`
 	PubDate     string `xml:"pubDate"`
 	Description string `xml:"description"`
+}
+
+// Product Feed: Shopify
+
+type ShopifyProducts struct {
+	Products []ShopifyProduct `json:"products"`
+}
+
+type ShopifyProduct struct {
+	Title    string           `json:"title"`
+	Variants []ShopifyVariant `json:"variants"`
+}
+
+type ShopifyVariant struct {
+	Sku   string `json:"sku"`
+	Price string `json:"price"`
+	Qty   int    `json:"qty"`
+}
+
+// Product Feed: WooCommerce
+
+type WooProducts struct {
+	Products []WooProduct `json:"products"`
+}
+
+type WooProduct struct {
+	Title    string              `json:"title"`
+	Variants []WooProductVariant `json:"variants"`
+}
+
+type WooProductVariant struct {
+	Sku   string `json:"sku"`
+	Price string `json:"price"`
+	Qty   int    `json:"qty"`
 }

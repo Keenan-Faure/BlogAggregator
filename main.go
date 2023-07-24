@@ -2,8 +2,10 @@ package main
 
 import (
 	"blog/internal/database"
+	"fmt"
 	"log"
 	"net/http"
+	"productfetch"
 	"utils"
 
 	"github.com/go-chi/chi/v5"
@@ -25,6 +27,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	woo, err := productfetch.InitConfigWoo()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(woo.FetchProducts())
+	shopify, err := productfetch.InitConfigShopify()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(shopify.FetchProducts())
 
 	FetchWorker(dbconfig)
 
