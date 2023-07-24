@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"objects"
+	"productfetch"
 	"strings"
 	"sync"
 	"time"
@@ -16,13 +17,20 @@ import (
 	"github.com/google/uuid"
 )
 
-const fetch_time_xml = 60 * time.Second  // 60 seconds
-const fetch_time_json = 45 * time.Second // 60 seconds
-const n_feeds_to_fetch = 10              // number of feeds to fetch from the database
+const fetch_time_xml = 60 * time.Second     // 60 seconds
+const fetch_time_woo = 50 * time.Second     // 60 seconds
+const fetch_time_shopify = 25 * time.Second // 60 seconds
+
+const n_feeds_to_fetch = 10 // number of feeds to fetch from the database
 
 // initiates the worker to fetch data
-func FetchWorker(dbconfig dbConfig) {
+func FetchWorker(
+	dbconfig dbConfig,
+	shopConf productfetch.ConfigShopify,
+	wooConf productfetch.ConfigWoo) {
 	go LoopXML(dbconfig, fetch_time_xml)
+	go LoopJSONShopify(dbconfig, shopConf, fetch_time_shopify)
+	go LoopJSONWoo(dbconfig, wooConf, fetch_time_woo)
 }
 
 // fetches feed(s) from a url
@@ -95,15 +103,37 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 
 // loop function that uses Goroutine to run
 // a function each interval
-func LoopJSON(dbconfig dbConfig, interval time.Duration) {
+func LoopJSONShopify(
+	dbconfig dbConfig,
+	shopifyConfig productfetch.ConfigShopify,
+	interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for ; ; <-ticker.C {
-		unprocessedFeeds, err := dbconfig.DB.GetNextFeedsToFetch(context.Background(), n_feeds_to_fetch)
+		// fetches all product data
+		shopifyProds, err := shopifyConfig.FetchProducts()
 		if err != nil {
-			log.Println("Error fetching next feeds to process:", err)
+			log.Println("Shopify > Error fetching next products to process:", err)
 			continue
 		}
-		ProcessFeeds(dbconfig, unprocessedFeeds)
+		ProcessShopifyProducts(dbconfig, shopifyProds)
+	}
+}
+
+// loop function that uses Goroutine to run
+// a function each interval
+func LoopJSONWoo(
+	dbconfig dbConfig,
+	wooConfig productfetch.ConfigWoo,
+	interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	for ; ; <-ticker.C {
+		// fetches all product data
+		wooProds, err := wooConfig.FetchProducts()
+		if err != nil {
+			log.Println("WooCommerce > Error fetching next products to process:", err)
+			continue
+		}
+		ProcessWooProducts(dbconfig, wooProds)
 	}
 }
 
