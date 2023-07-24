@@ -8,6 +8,8 @@ replace internal/docs => ./internal/docs
 
 replace internal/dbconfig => ./internal/dbconfig
 
+replace internal/productfetch => ./internal/productfetch
+
 go 1.20
 
 require (

@@ -76,8 +76,8 @@ func CheckStringWithWord(sentence, word string) bool {
 
 // determines which sorting method to use based on query param
 func FindSortParam(sortParam string) string {
-	if sortParam != strings.ToLower("asc") {
-		return "acs"
+	if strings.ToLower(sortParam) == "asc" {
+		return "asc"
 	}
 	return "desc"
 }

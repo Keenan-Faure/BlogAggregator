@@ -16,12 +16,12 @@ import (
 	"github.com/google/uuid"
 )
 
-const fetch_time = 60 * time.Second //60 seconds
+const fetch_time = 60 * time.Second // 60 seconds
 const n_feeds_to_fetch = 10         // number of feeds to fetch from the database
 
-// initiates the worker to fetch feeds
+// initiates the worker to fetch data
 func FetchWorker(dbconfig dbConfig) {
-	go Reaploop(dbconfig, fetch_time)
+	go ReaploopXML(dbconfig, fetch_time)
 }
 
 // fetches feed(s) from a url
@@ -95,7 +95,7 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 
 // loop function that uses Goroutine to run
 // a function each interval
-func Reaploop(dbconfig dbConfig, interval time.Duration) {
+func ReaploopXML(dbconfig dbConfig, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for ; ; <-ticker.C {
 		unprocessedFeeds, err := dbconfig.DB.GetNextFeedsToFetch(context.Background(), n_feeds_to_fetch)

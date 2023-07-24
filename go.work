@@ -4,5 +4,6 @@ use (
 	.
 	./internal/docs
 	./internal/objects
+	./internal/productfetch
 	./internal/utils
 )
