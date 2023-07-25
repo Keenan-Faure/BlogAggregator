@@ -3,15 +3,15 @@ package main
 import (
 	"blog/internal/database"
 	"database/sql"
-	"utils"
+	"log"
 )
 
 // Initiates a connection to the database and
 // if successful returns the connection
-func InitConn() (dbConfig, error) {
-	dbURL := utils.LoadEnv("db_url")
+func InitConn(dbURL string) (dbConfig, error) {
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
+		log.Fatal("Error when connecting to the database: ", err)
 		return dbConfig{}, err
 	}
 	return storeConfig(db), nil

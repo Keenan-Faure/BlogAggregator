@@ -10,6 +10,7 @@ A Blog Aggregator that fetches data from remote sources
 - Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
 - Fetching and encoding of xml RSS feeds
 - Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
+- Fetching, storing and displaying JSON product data from E-Commerce websites like Shopify and WooCommerce.
 
 ### Extensions added
 
@@ -17,7 +18,7 @@ A Blog Aggregator that fetches data from remote sources
 
 ## Prerequistes
 
-### Install POSTGRESQL and check if install was successful
+### 1. Install POSTGRESQL and check if install was successful
 
 Mac OS:
 
@@ -36,21 +37,21 @@ sudo apt install postgresql postgresql-contrib
 sudo service postgresql start
 ```
 
-### Install sqlc
+### 2. Install sqlc
 
 ```
 go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
 sqlc version
 ```
 
-### Install Goose
+### 3. Install Goose
 
 ```
 go install github.com/pressly/goose/v3/cmd/goose@latest
 goose -version
 ```
 
-### Install the Go PostgreSQL driver
+### 4. Install the Go PostgreSQL driver
 
 This module is used by `database/sql` and the `_` when importing indicates this.
 
@@ -58,20 +59,22 @@ This module is used by `database/sql` and the `_` when importing indicates this.
 go get github.com/lib/pq
 ```
 
-### Configuring the .env file
+### 5. Configuring the .env file
 
 By default you should have an `.env` file in your directory. However, these are default values!
 Kindly populate them with the correct data.
 
-## How to run the migrations:
+### 6. Run the migrations:
 
-- Navigate to the `sql/schema` directory and run `goose postgres {{CONN}} up`
+- Navigate to the `sql/schema` directory of the project and run `goose postgres {{CONN}} up`
 
 Where `CONN` is the connection string for your database which follow the format:
 
 ```
 protocol://username:password@host:port/database
 ```
+
+**Note that if the prerequistes are not completed, then the application will fail to run (ಥ \_ ಥ)**
 
 ## API Documentation
 

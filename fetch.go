@@ -19,8 +19,8 @@ import (
 )
 
 const fetch_time_xml = 60 * time.Second     // 60 seconds
-const fetch_time_woo = 50 * time.Second     // 60 seconds
-const fetch_time_shopify = 25 * time.Second // 60 seconds
+const fetch_time_woo = 50 * time.Second     // 50 seconds
+const fetch_time_shopify = 25 * time.Second // 25 seconds
 
 const n_feeds_to_fetch = 10 // number of feeds to fetch from the database
 
@@ -30,19 +30,16 @@ func FetchWorker(
 	shopConf productfetch.ConfigShopify,
 	wooConf productfetch.ConfigWoo) {
 	go LoopXML(dbconfig, fetch_time_xml)
-	if shopConf.Url != "" {
+	if shopConf.Valid {
 		go LoopJSONShopify(dbconfig, shopConf, fetch_time_shopify)
 	}
-	if wooConf.Url != "" {
+	if wooConf.Valid {
 		go LoopJSONWoo(dbconfig, wooConf, fetch_time_woo)
 	}
 }
 
 // fetches feed(s) from a url
 func FetchFeed(url string) (objects.RSS, error) {
-	// if !utils.CheckStringWithWord(url, ".xml") {
-	// 	return objects.RSS{}, errors.New("unable to parse non-xml feed")
-	// }
 	resp, err := http.Get(url)
 	if err != nil {
 		return objects.RSS{}, err

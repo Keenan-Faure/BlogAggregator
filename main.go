@@ -17,16 +17,10 @@ type dbConfig struct {
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(cors.Handler(MiddleWare()))
-
-	v1 := chi.NewRouter()
-
-	dbconfig, err := InitConn()
+	dbconfig, err := InitConn(utils.LoadEnv("db_url"))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	woo, err := productfetch.InitConfigWoo()
 	if err != nil {
 		log.Println(err)
@@ -37,6 +31,10 @@ func main() {
 	}
 
 	FetchWorker(dbconfig, shopify, woo)
+
+	r := chi.NewRouter()
+	r.Use(cors.Handler(MiddleWare()))
+	v1 := chi.NewRouter()
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
