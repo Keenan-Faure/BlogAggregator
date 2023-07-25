@@ -2,7 +2,6 @@ package main
 
 import (
 	"blog/internal/database"
-	"fmt"
 	"log"
 	"net/http"
 	"productfetch"
@@ -30,15 +29,12 @@ func main() {
 
 	woo, err := productfetch.InitConfigWoo()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-
-	fmt.Println(woo.FetchProducts())
 	shopify, err := productfetch.InitConfigShopify()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	fmt.Println(shopify.FetchProducts())
 
 	FetchWorker(dbconfig, shopify, woo)
 
@@ -54,6 +50,7 @@ func main() {
 	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.UnFollowFeedHandle)
 	v1.Get("/posts", dbconfig.middlewareAuth(dbconfig.GetPostFollowHandle))
 	v1.Get("/posts_search", dbconfig.SearchPostHandle)
+
 	v1.Get("/", dbconfig.Endpoints)
 	r.Mount("/v1", v1)
 

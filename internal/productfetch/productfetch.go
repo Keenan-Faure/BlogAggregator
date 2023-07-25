@@ -3,7 +3,6 @@ package productfetch
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -25,7 +24,7 @@ type ConfigShopify struct {
 	Url         string
 }
 
-const PRODUCT_FETCH_LIMIT = "10" // limit on products to fetch
+const PRODUCT_FETCH_LIMIT = "50" // limit on products to fetch
 
 // Initiates the connection string for woocommerce
 func InitConfigWoo() (ConfigWoo, error) {
@@ -85,7 +84,7 @@ func InitConfigShopify() (ConfigShopify, error) {
 
 	validation := validateConfig(store_name, api_key, api_password)
 	if validation != nil {
-		log.Fatal("Error setting up connection string for Shopify")
+		log.Println("Error setting up connection string for Shopify")
 		return ConfigShopify{}, validation
 	}
 	return ConfigShopify{
@@ -101,7 +100,6 @@ func (shopifyConfig *ConfigShopify) FetchProducts() (objects.ShopifyProducts, er
 		Timeout: time.Second * 10,
 	}
 	req, err := http.NewRequest(http.MethodGet, shopifyConfig.Url+"?limit="+PRODUCT_FETCH_LIMIT, nil)
-	fmt.Println(shopifyConfig.Url + "?limit=" + PRODUCT_FETCH_LIMIT)
 	if err != nil {
 		log.Fatal(err)
 		return objects.ShopifyProducts{}, err
@@ -118,7 +116,6 @@ func (shopifyConfig *ConfigShopify) FetchProducts() (objects.ShopifyProducts, er
 		return objects.ShopifyProducts{}, err
 	}
 	products := objects.ShopifyProducts{}
-	fmt.Println(len(products.Products))
 	err = json.Unmarshal(respBody, &products)
 	if err != nil {
 		log.Fatal(err)

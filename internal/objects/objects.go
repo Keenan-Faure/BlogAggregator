@@ -122,9 +122,9 @@ type ShopifyProduct struct {
 }
 
 type ShopifyVariant struct {
-	Sku   string `json:"sku"`
-	Price string `json:"price"`
-	Qty   int    `json:"qty"`
+	Sku               string `json:"sku"`
+	Price             string `json:"price"`
+	InventoryQuantity int    `json:"inventory_quantity"`
 }
 
 // Product Feed: WooCommerce
@@ -134,12 +134,15 @@ type WooProducts struct {
 }
 
 type WooProduct struct {
-	Title    string              `json:"title"`
-	Variants []WooProductVariant `json:"variants"`
+	Title         string              `json:"title"`
+	Sku           string              `json:"sku"`
+	Price         string              `json:"price"`
+	StockQuantity int                 `json:"stock_quantity"`
+	Variants      []WooProductVariant `json:"variants"`
 }
 
 type WooProductVariant struct {
-	Sku   string `json:"sku"`
-	Price string `json:"price"`
-	Qty   int    `json:"qty"`
+	Sku           string `json:"sku"`
+	Price         string `json:"price"`
+	StockQuantity int    `json:"stock_quantity"`
 }

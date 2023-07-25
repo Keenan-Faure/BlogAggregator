@@ -4,6 +4,7 @@ import (
 	"blog/internal/database"
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -29,8 +30,12 @@ func FetchWorker(
 	shopConf productfetch.ConfigShopify,
 	wooConf productfetch.ConfigWoo) {
 	go LoopXML(dbconfig, fetch_time_xml)
-	go LoopJSONShopify(dbconfig, shopConf, fetch_time_shopify)
-	go LoopJSONWoo(dbconfig, wooConf, fetch_time_woo)
+	if shopConf.Url != "" {
+		go LoopJSONShopify(dbconfig, shopConf, fetch_time_shopify)
+	}
+	if wooConf.Url != "" {
+		go LoopJSONWoo(dbconfig, wooConf, fetch_time_woo)
+	}
 }
 
 // fetches feed(s) from a url
@@ -109,7 +114,6 @@ func LoopJSONShopify(
 	interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for ; ; <-ticker.C {
-		// fetches all product data
 		shopifyProds, err := shopifyConfig.FetchProducts()
 		if err != nil {
 			log.Println("Shopify > Error fetching next products to process:", err)
@@ -128,16 +132,32 @@ func ProcessShopifyProducts(dbconfig dbConfig, products objects.ShopifyProducts)
 				Title:     value.Title,
 				Sku:       sub_value.Sku,
 				Price:     sub_value.Price,
-				Qty:       int32(sub_value.Qty),
+				Qty:       int32(sub_value.InventoryQuantity),
 				CreatedAt: time.Now().UTC(),
 				UpdatedAt: time.Now().UTC(),
 			})
 			if err != nil {
-				log.Fatal("Error creating products", err)
+				if strings.ReplaceAll(err.Error(), "\"", "") == "pq: duplicate key value violates unique constraint shopify_sku_key" {
+					_, errUpdate := dbconfig.DB.UpdateShopifyProducts(
+						context.Background(),
+						database.UpdateShopifyProductsParams{
+							Title:     value.Title,
+							Price:     sub_value.Price,
+							Qty:       int32(sub_value.InventoryQuantity),
+							UpdatedAt: time.Now().UTC(),
+							Sku:       sub_value.Sku,
+						})
+					if errUpdate != nil {
+						fmt.Println(sub_value.Sku)
+						log.Fatal("Error updating shopify product: ", errUpdate)
+					}
+				} else {
+					log.Println("Error creating shopify product:", err)
+				}
 			}
 		}
 	}
-	log.Printf("Products collected %d from Shopify", len(products.Products))
+	log.Printf("From Shopify %d products were collected", len(products.Products))
 }
 
 // loop function that uses Goroutine to run
@@ -148,7 +168,6 @@ func LoopJSONWoo(
 	interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for ; ; <-ticker.C {
-		// fetches all product data
 		wooProds, err := wooConfig.FetchProducts()
 		if err != nil {
 			log.Println("WooCommerce > Error fetching next products to process:", err)
@@ -161,22 +180,68 @@ func LoopJSONWoo(
 // adds woocommerce products to the database
 func ProcessWooProducts(dbconfig dbConfig, products objects.WooProducts) {
 	for _, value := range products.Products {
+		if len(value.Variants) == 0 {
+			fmt.Println(value.Price)
+			fmt.Println(value.Sku)
+			_, err := dbconfig.DB.CreateWooProduct(context.Background(), database.CreateWooProductParams{
+				ID:        uuid.New(),
+				Title:     value.Title,
+				Sku:       value.Sku,
+				Price:     value.Price,
+				Qty:       int32(value.StockQuantity),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			})
+			if err != nil {
+				if strings.ReplaceAll(err.Error(), "\"", "") == "pq: duplicate key value violates unique constraint woocommerce_sku_key" {
+					_, errUpdate := dbconfig.DB.UpdateWooProducts(
+						context.Background(),
+						database.UpdateWooProductsParams{
+							Title:     value.Title,
+							Price:     value.Price,
+							Qty:       int32(value.StockQuantity),
+							UpdatedAt: time.Now().UTC(),
+							Sku:       value.Sku,
+						})
+					if errUpdate != nil {
+						log.Fatal("Error updating woo product: ", errUpdate)
+					}
+				} else {
+					log.Println("Error creating woo product:", err)
+				}
+			}
+		}
 		for _, sub_value := range value.Variants {
 			_, err := dbconfig.DB.CreateWooProduct(context.Background(), database.CreateWooProductParams{
 				ID:        uuid.New(),
 				Title:     value.Title,
 				Sku:       sub_value.Sku,
 				Price:     sub_value.Price,
-				Qty:       int32(sub_value.Qty),
+				Qty:       int32(sub_value.StockQuantity),
 				CreatedAt: time.Now().UTC(),
 				UpdatedAt: time.Now().UTC(),
 			})
 			if err != nil {
-				log.Fatal("Error creating products", err)
+				if strings.ReplaceAll(err.Error(), "\"", "") == "pq: duplicate key value violates unique constraint woocommerce_sku_key" {
+					_, errUpdate := dbconfig.DB.UpdateWooProducts(
+						context.Background(),
+						database.UpdateWooProductsParams{
+							Title:     value.Title,
+							Price:     sub_value.Price,
+							Qty:       int32(sub_value.StockQuantity),
+							UpdatedAt: time.Now().UTC(),
+							Sku:       sub_value.Sku,
+						})
+					if errUpdate != nil {
+						log.Fatal("Error updating product: ", errUpdate)
+					}
+				} else {
+					log.Println("Error creating product:", err)
+				}
 			}
 		}
 	}
-	log.Printf("Products collected %d from WooCommerce", len(products.Products))
+	log.Printf("From WooCommerce %d products were collected", len(products.Products))
 }
 
 // loop function that uses Goroutine to run
