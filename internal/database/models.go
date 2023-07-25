@@ -40,10 +40,30 @@ type Post struct {
 	FeedID      uuid.UUID      `json:"feed_id"`
 }
 
+type Shopify struct {
+	ID        uuid.UUID `json:"id"`
+	Title     string    `json:"title"`
+	Sku       string    `json:"sku"`
+	Price     string    `json:"price"`
+	Qty       int32     `json:"qty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
 	ApiKey    string    `json:"api_key"`
+}
+
+type Woocommerce struct {
+	ID        uuid.UUID `json:"id"`
+	Title     string    `json:"title"`
+	Sku       string    `json:"sku"`
+	Price     string    `json:"price"`
+	Qty       int32     `json:"qty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

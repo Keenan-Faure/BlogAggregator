@@ -69,6 +69,8 @@ func ConvertStringToSQL(description string) sql.NullString {
 	}
 }
 
+// converts a 
+
 // checks if a string contains certain characters word
 func CheckStringWithWord(sentence, word string) bool {
 	return strings.Contains(sentence, word)

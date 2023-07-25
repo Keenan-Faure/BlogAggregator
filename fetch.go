@@ -119,6 +119,27 @@ func LoopJSONShopify(
 	}
 }
 
+// adds shopify products to the database
+func ProcessShopifyProducts(dbconfig dbConfig, products objects.ShopifyProducts) {
+	for _, value := range products.Products {
+		for _, sub_value := range value.Variants {
+			_, err := dbconfig.DB.CreateShopifyProduct(context.Background(), database.CreateShopifyProductParams{
+				ID:        uuid.New(),
+				Title:     value.Title,
+				Sku:       sub_value.Sku,
+				Price:     sub_value.Price,
+				Qty:       int32(sub_value.Qty),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			})
+			if err != nil {
+				log.Fatal("Error creating products", err)
+			}
+		}
+	}
+	log.Printf("Products collected %d from Shopify", len(products.Products))
+}
+
 // loop function that uses Goroutine to run
 // a function each interval
 func LoopJSONWoo(
@@ -135,6 +156,27 @@ func LoopJSONWoo(
 		}
 		ProcessWooProducts(dbconfig, wooProds)
 	}
+}
+
+// adds woocommerce products to the database
+func ProcessWooProducts(dbconfig dbConfig, products objects.WooProducts) {
+	for _, value := range products.Products {
+		for _, sub_value := range value.Variants {
+			_, err := dbconfig.DB.CreateWooProduct(context.Background(), database.CreateWooProductParams{
+				ID:        uuid.New(),
+				Title:     value.Title,
+				Sku:       sub_value.Sku,
+				Price:     sub_value.Price,
+				Qty:       int32(sub_value.Qty),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			})
+			if err != nil {
+				log.Fatal("Error creating products", err)
+			}
+		}
+	}
+	log.Printf("Products collected %d from WooCommerce", len(products.Products))
 }
 
 // loop function that uses Goroutine to run

@@ -100,43 +100,6 @@ func (q *Queries) GetPostSearchTitle(ctx context.Context, similarToEscape string
 	return items, nil
 }
 
-const getPostSearchUrl = `-- name: GetPostSearchUrl :many
-SELECT id, created_at, updated_at, title, url, description, published_at, feed_id FROM posts WHERE "url"
-SIMILAR TO $1
-`
-
-func (q *Queries) GetPostSearchUrl(ctx context.Context, similarToEscape string) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostSearchUrl, similarToEscape)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Post
-	for rows.Next() {
-		var i Post
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Title,
-			&i.Url,
-			&i.Description,
-			&i.PublishedAt,
-			&i.FeedID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getPostsByUserAsc = `-- name: GetPostsByUserAsc :many
 SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id
 FROM posts

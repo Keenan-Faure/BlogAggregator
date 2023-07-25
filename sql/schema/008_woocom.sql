@@ -4,13 +4,9 @@ CREATE TABLE woocommerce(
     title TEXT NOT NULL,
     sku TEXT UNIQUE NOT NULL,
     price DECIMAL NOT NULL,
-    qty INTEGER,
+    qty INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    user_id UUID,
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
+    updated_at TIMESTAMP NOT NULL
 );
 
 -- +goose Down

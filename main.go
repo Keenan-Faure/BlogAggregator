@@ -40,7 +40,7 @@ func main() {
 	}
 	fmt.Println(shopify.FetchProducts())
 
-	FetchWorker(dbconfig)
+	FetchWorker(dbconfig, shopify, woo)
 
 	v1.Get("/readiness", ReadiHandle)
 	v1.Get("/err", ErrHandle)
