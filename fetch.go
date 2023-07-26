@@ -4,7 +4,6 @@ import (
 	"blog/internal/database"
 	"context"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -95,8 +94,20 @@ func process_feed(dbconfig dbConfig, feed database.Feed, wg *sync.WaitGroup) {
 			FeedID:      feed.ID,
 		})
 		if err != nil {
-			if strings.ReplaceAll(err.Error(), "\"", "") != "pq: duplicate key value violates unique constraint posts_url_key" {
-				log.Println("Error creating post:", err)
+			if strings.ReplaceAll(err.Error(), "\"", "") == "pq: duplicate key value violates unique constraint posts_url_key" {
+				_, errUpdate := dbconfig.DB.UpdatePost(
+					context.Background(),
+					database.UpdatePostParams{
+						UpdatedAt:   time.Now().UTC(),
+						Title:       value.Title,
+						Description: utils.ConvertStringToSQL(value.Description),
+						Url:         value.Link,
+					})
+				if errUpdate != nil {
+					log.Fatal("Error updating post: ", errUpdate)
+				}
+			} else {
+				log.Println("Error creating post: ", err)
 			}
 		}
 	}
@@ -145,7 +156,6 @@ func ProcessShopifyProducts(dbconfig dbConfig, products objects.ShopifyProducts)
 							Sku:       sub_value.Sku,
 						})
 					if errUpdate != nil {
-						fmt.Println(sub_value.Sku)
 						log.Fatal("Error updating shopify product: ", errUpdate)
 					}
 				} else {
@@ -178,8 +188,6 @@ func LoopJSONWoo(
 func ProcessWooProducts(dbconfig dbConfig, products objects.WooProducts) {
 	for _, value := range products.Products {
 		if len(value.Variants) == 0 {
-			fmt.Println(value.Price)
-			fmt.Println(value.Sku)
 			_, err := dbconfig.DB.CreateWooProduct(context.Background(), database.CreateWooProductParams{
 				ID:        uuid.New(),
 				Title:     value.Title,

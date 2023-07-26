@@ -11,6 +11,14 @@ INSERT INTO posts(
 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
+-- name: UpdatePost :one
+UPDATE posts SET
+"updated_at" = $1,
+"title" = $2,
+"description" = $3
+WHERE "url" = $4
+RETURNING *;
+
 -- name: GetPostsByUserAsc :many
 SELECT posts.*
 FROM posts
@@ -32,3 +40,13 @@ LIMIT $2 OFFSET $3;
 -- name: GetPostSearchTitle :many
 SELECT * FROM posts WHERE "title"
 SIMILAR TO $1;
+
+-- >> used for tests << --
+
+-- name: GetFirstRecordPost :one
+SELECT * FROM posts
+LIMIT 1;
+
+-- name: DeleteTestPosts :exec
+DELETE FROM posts
+WHERE feed_id = $1;

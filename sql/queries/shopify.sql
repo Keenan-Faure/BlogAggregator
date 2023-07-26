@@ -32,3 +32,5 @@ SELECT * FROM shopify
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2;
 
+-- >> used for tests << --
+

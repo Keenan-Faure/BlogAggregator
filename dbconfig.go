@@ -11,7 +11,7 @@ import (
 func InitConn(dbURL string) (dbConfig, error) {
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatal("Error when connecting to the database: ", err)
+		log.Fatal("Error connecting to the database: ", err)
 		return dbConfig{}, err
 	}
 	return storeConfig(db), nil

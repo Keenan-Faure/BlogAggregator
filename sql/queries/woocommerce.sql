@@ -31,3 +31,5 @@ WHERE "sku" SIMILAR TO $1;
 SELECT * FROM woocommerce
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2;
+
+-- >> used for tests << --

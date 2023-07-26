@@ -63,6 +63,39 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	return i, err
 }
 
+const deleteTestPosts = `-- name: DeleteTestPosts :exec
+DELETE FROM posts
+WHERE feed_id = $1
+`
+
+func (q *Queries) DeleteTestPosts(ctx context.Context, feedID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteTestPosts, feedID)
+	return err
+}
+
+const getFirstRecordPost = `-- name: GetFirstRecordPost :one
+
+SELECT id, created_at, updated_at, title, url, description, published_at, feed_id FROM posts
+LIMIT 1
+`
+
+// >> used for tests << --
+func (q *Queries) GetFirstRecordPost(ctx context.Context) (Post, error) {
+	row := q.db.QueryRowContext(ctx, getFirstRecordPost)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
+		&i.Description,
+		&i.PublishedAt,
+		&i.FeedID,
+	)
+	return i, err
+}
+
 const getPostSearchTitle = `-- name: GetPostSearchTitle :many
 SELECT id, created_at, updated_at, title, url, description, published_at, feed_id FROM posts WHERE "title"
 SIMILAR TO $1
@@ -194,4 +227,41 @@ func (q *Queries) GetPostsByUserDesc(ctx context.Context, arg GetPostsByUserDesc
 		return nil, err
 	}
 	return items, nil
+}
+
+const updatePost = `-- name: UpdatePost :one
+UPDATE posts SET
+"updated_at" = $1,
+"title" = $2,
+"description" = $3
+WHERE "url" = $4
+RETURNING id, created_at, updated_at, title, url, description, published_at, feed_id
+`
+
+type UpdatePostParams struct {
+	UpdatedAt   time.Time      `json:"updated_at"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	Url         string         `json:"url"`
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
+	row := q.db.QueryRowContext(ctx, updatePost,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Description,
+		arg.Url,
+	)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Url,
+		&i.Description,
+		&i.PublishedAt,
+		&i.FeedID,
+	)
+	return i, err
 }

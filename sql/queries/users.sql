@@ -16,4 +16,8 @@ WHERE api_key = $1;
 select * from users
 WHERE "name" = $1;
 
--- https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
+-- >> used for tests << --
+
+-- name: DeleteTestUsers :exec
+DELETE FROM users
+WHERE id = $1;

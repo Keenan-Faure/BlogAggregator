@@ -17,18 +17,21 @@ type dbConfig struct {
 }
 
 func main() {
-	dbconfig, err := InitConn(utils.LoadEnv("db_url"))
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	woo, err := productfetch.InitConfigWoo()
-	if err != nil {
-		log.Println(err)
-	}
-	shopify, err := productfetch.InitConfigShopify()
-	if err != nil {
-		log.Println(err)
-	}
+
+	store_name := utils.LoadEnv("woo_store_name")
+	api_key := utils.LoadEnv("woo_consumer_key")
+	api_secret := utils.LoadEnv("woo_consumer_secret")
+	woo := productfetch.InitConfigWoo(store_name, api_key, api_secret)
+
+	store_name_shopify := utils.LoadEnv("store_name")
+	api_key_shopify := utils.LoadEnv("api_key")
+	api_password_shopify := utils.LoadEnv("api_password")
+	version := utils.LoadEnv("version")
+	shopify := productfetch.InitConfigShopify(store_name_shopify, api_key_shopify, api_password_shopify, version)
 
 	FetchWorker(dbconfig, shopify, woo)
 

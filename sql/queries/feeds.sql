@@ -44,3 +44,9 @@ RETURNING *;
 -- name: GetFeedSearchName :many
 SELECT * FROM feeds WHERE "name"
 SIMILAR TO $1;
+
+-- >> used for tests << --
+
+-- name: DeleteTestFeeds :exec
+DELETE FROM feeds
+WHERE user_id = $1;

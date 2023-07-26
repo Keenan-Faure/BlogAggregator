@@ -22,3 +22,6 @@ WHERE user_id = $1;
 -- name: DeleteFeedByID :one
 DELETE FROM feed_follows WHERE id = $1
 RETURNING *;
+
+-- >> used for tests << --
+
