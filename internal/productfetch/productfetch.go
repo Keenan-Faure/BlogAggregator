@@ -28,12 +28,8 @@ type ConfigShopify struct {
 const PRODUCT_FETCH_LIMIT = "50" // limit on products to fetch
 
 // Initiates the connection string for woocommerce
-func InitConfigWoo() (ConfigWoo, error) {
-	store_name := utils.LoadEnv("woo_store_name")
-	api_key := utils.LoadEnv("woo_consumer_key")
-	api_secret := utils.LoadEnv("woo_consumer_secret")
-
-	validation := validateConfig(store_name, api_key, api_secret)
+func InitConfigWoo(store_name, api_key, api_secret string) ConfigWoo {
+	validation := validateConfigWoo(store_name, api_key, api_secret)
 	if !validation {
 		log.Println("Error setting up connection string for WooCommerce")
 	}
@@ -42,7 +38,7 @@ func InitConfigWoo() (ConfigWoo, error) {
 		Secret: api_secret,
 		Url:    "https://" + store_name + "/wc-api/v3/products?consumer_key=" + api_key + "&consumer_secret=" + api_secret,
 		Valid:  validation,
-	}, nil
+	}
 }
 
 // Fetches products from WooCommerce defined on the wooConfig url
@@ -77,13 +73,8 @@ func (wooConfig *ConfigWoo) FetchProducts() (objects.WooProducts, error) {
 }
 
 // Initiates the connection string for shopify
-func InitConfigShopify() (ConfigShopify, error) {
-	store_name := utils.LoadEnv("store_name")
-	api_key := utils.LoadEnv("api_key")
-	api_password := utils.LoadEnv("api_password")
-	version := utils.LoadEnv("version")
-
-	validation := validateConfig(store_name, api_key, api_password)
+func InitConfigShopify(store_name, api_key, api_password, version string) ConfigShopify {
+	validation := validateConfigShopify(store_name, api_key, api_password)
 	if !validation {
 		log.Println("Error setting up connection string for Shopify")
 	}
@@ -93,7 +84,7 @@ func InitConfigShopify() (ConfigShopify, error) {
 		Version:     version,
 		Url:         "https://" + api_key + ":" + api_password + "@" + store_name + ".myshopify.com/admin/api/" + version + "/products.json",
 		Valid:       validation,
-	}, nil
+	}
 }
 
 func (shopifyConfig *ConfigShopify) FetchProducts() (objects.ShopifyProducts, error) {
@@ -125,8 +116,25 @@ func (shopifyConfig *ConfigShopify) FetchProducts() (objects.ShopifyProducts, er
 	return products, nil
 }
 
-// validates the data for the API config connectors
-func validateConfig(store_name, api_key, api_password string) bool {
+// validates the data for WooCommerce
+func validateConfigWoo(store_name, api_key, api_password string) bool {
+	if store_name == "" {
+		log.Println("invalid store name")
+		return false
+	}
+	if api_key == "" || !utils.CheckStringWithWord(api_key, "cs_") {
+		log.Println("invalid api key")
+		return false
+	}
+	if api_password == "" || !utils.CheckStringWithWord(api_password, "ck_") {
+		log.Println("invalid api password")
+		return false
+	}
+	return true
+}
+
+// validates the data for Shopify
+func validateConfigShopify(store_name, api_key, api_password string) bool {
 	if store_name == "" {
 		log.Println("invalid store name")
 		return false
