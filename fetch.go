@@ -28,7 +28,9 @@ func FetchWorker(
 	dbconfig dbConfig,
 	shopConf productfetch.ConfigShopify,
 	wooConf productfetch.ConfigWoo) {
-	go LoopXML(dbconfig, fetch_time_xml)
+	if dbconfig.Valid {
+		go LoopXML(dbconfig, fetch_time_xml)
+	}
 	if shopConf.Valid {
 		go LoopJSONShopify(dbconfig, shopConf, fetch_time_shopify)
 	}

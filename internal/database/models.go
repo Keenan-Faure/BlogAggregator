@@ -48,6 +48,7 @@ type Shopify struct {
 	Qty       int32     `json:"qty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	StoreName string    `json:"store_name"`
 }
 
 type User struct {
@@ -66,4 +67,5 @@ type Woocommerce struct {
 	Qty       int32     `json:"qty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	StoreName string    `json:"store_name"`
 }

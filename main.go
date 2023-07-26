@@ -13,7 +13,8 @@ import (
 )
 
 type dbConfig struct {
-	DB *database.Queries
+	DB    *database.Queries
+	Valid bool
 }
 
 func main() {

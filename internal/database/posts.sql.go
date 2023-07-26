@@ -74,12 +74,10 @@ func (q *Queries) DeleteTestPosts(ctx context.Context, feedID uuid.UUID) error {
 }
 
 const getFirstRecordPost = `-- name: GetFirstRecordPost :one
-
 SELECT id, created_at, updated_at, title, url, description, published_at, feed_id FROM posts
 LIMIT 1
 `
 
-// >> used for tests << --
 func (q *Queries) GetFirstRecordPost(ctx context.Context) (Post, error) {
 	row := q.db.QueryRowContext(ctx, getFirstRecordPost)
 	var i Post

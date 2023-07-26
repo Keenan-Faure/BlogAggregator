@@ -122,11 +122,11 @@ func validateConfigWoo(store_name, api_key, api_password string) bool {
 		log.Println("invalid store name")
 		return false
 	}
-	if api_key == "" || !utils.CheckStringWithWord(api_key, "cs_") {
+	if api_key == "" || !utils.CheckStringWithWord(api_key, "ck_") {
 		log.Println("invalid api key")
 		return false
 	}
-	if api_password == "" || !utils.CheckStringWithWord(api_password, "ck_") {
+	if api_password == "" || !utils.CheckStringWithWord(api_password, "cs_") {
 		log.Println("invalid api password")
 		return false
 	}

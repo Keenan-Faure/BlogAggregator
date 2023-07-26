@@ -1,13 +1,14 @@
 -- name: CreateShopifyProduct :one
 INSERT INTO shopify(
     id,
+    store_name,
     title,
     sku,
     price,
     qty,
     created_at,
     updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7)
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- name: UpdateShopifyProducts :one
@@ -32,5 +33,10 @@ SELECT * FROM shopify
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2;
 
--- >> used for tests << --
+-- name: GetFirstRecordShopify :one
+SELECT * FROM shopify
+LIMIT 1;
 
+-- name: DeleteTestShopifyProducts :exec
+DELETE FROM shopify
+WHERE store_name = $1;

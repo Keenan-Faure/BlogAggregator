@@ -41,8 +41,6 @@ LIMIT $2 OFFSET $3;
 SELECT * FROM posts WHERE "title"
 SIMILAR TO $1;
 
--- >> used for tests << --
-
 -- name: GetFirstRecordPost :one
 SELECT * FROM posts
 LIMIT 1;

@@ -1,13 +1,14 @@
 -- name: CreateWooProduct :one
 INSERT INTO woocommerce(
     id,
+    store_name,
     title,
     sku,
     price,
     qty,
     created_at,
     updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7)
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- name: UpdateWooProducts :one
@@ -32,4 +33,10 @@ SELECT * FROM woocommerce
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2;
 
--- >> used for tests << --
+-- name: GetFirstRecordWoo :one
+SELECT * FROM woocommerce
+LIMIT 1;
+
+-- name: DeleteTestWooProducts :exec
+DELETE FROM woocommerce
+WHERE store_name = $1;

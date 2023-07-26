@@ -49,12 +49,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteTestUsers = `-- name: DeleteTestUsers :exec
-
 DELETE FROM users
 WHERE id = $1
 `
 
-// >> used for tests << --
 func (q *Queries) DeleteTestUsers(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteTestUsers, id)
 	return err
