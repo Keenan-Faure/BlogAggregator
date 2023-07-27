@@ -2,10 +2,17 @@ package main
 
 import (
 	"blog/internal/database"
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"objects"
 	"productfetch"
+	"strconv"
 	"time"
 	"utils"
 
@@ -143,4 +150,324 @@ func TestFetchWorker(t *testing.T) {
 	dbconfig.DB.DeleteTestFeeds(context.Background(), id_user)
 	dbconfig.DB.DeleteTestPosts(context.Background(), id_feed)
 	dbconfig.DB.DeleteTestUsers(context.Background(), id_user)
+}
+
+func TestFetchWorkerShopify(t *testing.T) {
+	fmt.Println("Test Case 1 - using shopify api url in env")
+
+	store_name_shopify := utils.LoadEnv("t_store_name")
+	api_key_shopify := utils.LoadEnv("t_api_key")
+	api_password_shopify := utils.LoadEnv("t_api_password")
+	version := utils.LoadEnv("t_version")
+	shopify := productfetch.InitConfigShopify(store_name_shopify, api_key_shopify, api_password_shopify, version)
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+
+	time_now := time.Now().UTC()
+	FetchWorker(dbconfig, shopify, productfetch.ConfigWoo{})
+	time.Sleep(time.Second * 5)
+
+	product, err := dbconfig.DB.GetFirstRecordShopify(context.Background())
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+	if time_now.Compare(product.UpdatedAt) != -1 {
+		t.Errorf("Expected 'UpdatedAt' to be after 'time_now'")
+	}
+	dbconfig.DB.DeleteTestShopifyProducts(context.Background(), store_name_shopify)
+}
+
+func TestFetchWorkerWoo(t *testing.T) {
+	fmt.Println("Test Case 1 - using woocommerce api url in env")
+
+	store_name := utils.LoadEnv("t_woo_store_name")
+	api_key := utils.LoadEnv("t_woo_consumer_key")
+	api_secret := utils.LoadEnv("t_woo_consumer_secret")
+	woo := productfetch.InitConfigWoo(store_name, api_key, api_secret)
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+
+	time_now := time.Now().UTC()
+	FetchWorker(dbconfig, productfetch.ConfigShopify{}, woo)
+	time.Sleep(time.Second * 5)
+
+	product, err := dbconfig.DB.GetFirstRecordWoo(context.Background())
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+	if time_now.Compare(product.UpdatedAt) != -1 {
+		t.Errorf("Expected 'UpdatedAt' to be after 'time_now'")
+	}
+	dbconfig.DB.DeleteTestWooProducts(context.Background(), store_name)
+}
+
+func UFetchHelper(endpoint, method, auth string) (*http.Response, error) {
+	httpClient := http.Client{
+		Timeout: time.Second * 20,
+	}
+	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, nil)
+	if auth != "" {
+		req.Header.Add("Authorization", "ApiKey "+auth)
+	}
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	return res, nil
+}
+
+func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*http.Response, error) {
+	httpClient := http.Client{
+		Timeout: time.Second * 20,
+	}
+	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, body)
+	if auth != "" {
+		req.Header.Add("Authorization", "ApiKey "+auth)
+	}
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	return res, nil
+}
+
+func UCreateUser() database.User {
+	userBody := database.User{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      "test_abc123_xyz_def",
+	}
+	var buffer bytes.Buffer
+	json.NewEncoder(&buffer).Encode(userBody)
+	res, _ := UFetchHelperPost("users", "POST", "", &buffer)
+	defer res.Body.Close()
+	respBody, _ := io.ReadAll(res.Body)
+	userData := database.User{}
+	json.Unmarshal(respBody, &userData)
+	return userData
+}
+
+func TestErrEndpoint(t *testing.T) {
+	fmt.Println("Test 1 - testing GET /err")
+	type ErrorStruct struct {
+		Error string `json:"error"`
+	}
+	res, err := UFetchHelper("err", "GET", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	data := ErrorStruct{}
+	err = json.Unmarshal(respBody, &data)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if data.Error != "Internal Server Error" {
+		t.Errorf("Expected 'Internal Server Error' but found: " + data.Error)
+	}
+
+	fmt.Println("Test 2 - testing POST /err")
+	res, err = UFetchHelper("err", "POST", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	_, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 405 {
+		t.Errorf("Expected '405' but found: " + strconv.Itoa(res.StatusCode))
+	}
+}
+
+func TestReadinessEndpoint(t *testing.T) {
+	fmt.Println("Test 1 - testing GET /readiness")
+	type readinessStruct struct {
+		Status string `json:"status"`
+	}
+	res, err := UFetchHelper("readiness", "GET", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	data := readinessStruct{}
+	err = json.Unmarshal(respBody, &data)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if data.Status != "ok" {
+		t.Errorf("Expected 'ok' but found: " + data.Status)
+	}
+
+	fmt.Println("Test 2 - testing POST /readiness")
+	res, err = UFetchHelper("err", "POST", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	_, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 405 {
+		t.Errorf("Expected '405' but found: " + strconv.Itoa(res.StatusCode))
+	}
+}
+
+func TestUserCrud(t *testing.T) {
+	fmt.Println("Test 1 - Creating user")
+	userBody := database.User{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      "test_abc123_xyz_def",
+	}
+	var buffer bytes.Buffer
+	err := json.NewEncoder(&buffer).Encode(userBody)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	res, err := UFetchHelperPost("users", "POST", "", &buffer)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 201 {
+		t.Errorf("Expected '201' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	userData := database.User{}
+	err = json.Unmarshal(respBody, &userData)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if userData.Name != "test_abc123_xyz_def" {
+		t.Errorf("Expected 'test_abc123_xyz_def' but found: " + userData.Name)
+	}
+
+	fmt.Println("Test 2 - Fetching user")
+	res, err = UFetchHelperPost("users", "GET", userData.ApiKey, nil)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 202 {
+		t.Errorf("Expected '202' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	userData = database.User{}
+	err = json.Unmarshal(respBody, &userData)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if userData.Name != "test_abc123_xyz_def" {
+		t.Errorf("Expected 'test_abc123_xyz_def' but found: " + userData.Name)
+	}
+
+	fmt.Println("Test 3 - Deleting user & recheck")
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+	dbconfig.DB.DeleteTestUsers(context.Background(), userData.ID)
+	type ErrorStruct struct {
+		Error string `json:"error"`
+	}
+	res, err = UFetchHelper("users", "GET", userData.ApiKey)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 404 {
+		t.Errorf("Expected '404' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	data := ErrorStruct{}
+	err = json.Unmarshal(respBody, &data)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if data.Error != "record not found" {
+		t.Errorf("Expected 'record not found' but found: " + data.Error)
+	}
+}
+
+func TestFeedCrud(t *testing.T) {
+	fmt.Println("Test 1 - Creating Feed")
+	user := UCreateUser()
+	var buffer bytes.Buffer
+	err := json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
+		Name: "test_feed_xyz_123_456",
+		URL:  "no_one.would_have_this_name.com",
+	})
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	res, err := UFetchHelperPost("feed", "POST", user.ApiKey, &buffer)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 201 {
+		t.Errorf("Expected '201' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	type FeedCreation struct {
+		Feed       objects.ResponseBodyFeed `json:"feed"`
+		FeedFollow database.FeedFollow      `json:"feed_follow"`
+	}
+	feedData := FeedCreation{}
+	err = json.Unmarshal(respBody, &feedData)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if feedData.Feed.Name != "test_feed_xyz_123_456" {
+		t.Errorf("Expected 'test_feed_xyz_123_456' but found: " + feedData.Feed.Name)
+	}
+
+	fmt.Println("Test 2 -  Fetching Feed")
+
+	fmt.Println("Test 3 - Deleting Feed & recheck")
 }
