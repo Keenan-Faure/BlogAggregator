@@ -2,6 +2,7 @@ package main
 
 import (
 	"blog/internal/database"
+	"flag"
 	"log"
 	"net/http"
 	"productfetch"
@@ -22,19 +23,28 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	store_name := utils.LoadEnv("woo_store_name")
-	api_key := utils.LoadEnv("woo_consumer_key")
-	api_secret := utils.LoadEnv("woo_consumer_secret")
-	woo := productfetch.InitConfigWoo(store_name, api_key, api_secret)
+	dbg := flag.Bool("test", false, "Enable server for tests only")
+	flag.Parse()
 
-	store_name_shopify := utils.LoadEnv("store_name")
-	api_key_shopify := utils.LoadEnv("api_key")
-	api_password_shopify := utils.LoadEnv("api_password")
-	version := utils.LoadEnv("version")
-	shopify := productfetch.InitConfigShopify(store_name_shopify, api_key_shopify, api_password_shopify, version)
+	if !*dbg {
+		store_name := utils.LoadEnv("woo_store_name")
+		api_key := utils.LoadEnv("woo_consumer_key")
+		api_secret := utils.LoadEnv("woo_consumer_secret")
+		woo := productfetch.InitConfigWoo(store_name, api_key, api_secret)
 
-	FetchWorker(dbconfig, shopify, woo)
+		store_name_shopify := utils.LoadEnv("store_name")
+		api_key_shopify := utils.LoadEnv("api_key")
+		api_password_shopify := utils.LoadEnv("api_password")
+		version := utils.LoadEnv("version")
+		shopify := productfetch.InitConfigShopify(store_name_shopify, api_key_shopify, api_password_shopify, version)
 
+		FetchWorker(dbconfig, shopify, woo)
+	}
+	setUpAPI(dbconfig)
+}
+
+// starts up the API
+func setUpAPI(dbconfig dbConfig) {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(MiddleWare()))
 	v1 := chi.NewRouter()
