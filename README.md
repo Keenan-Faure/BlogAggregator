@@ -4,17 +4,17 @@ A Blog Aggregator that fetches data from remote sources
 
 ## Main Features
 
-- Building a RESTful API in Go
-- Uses production-ready database tools like [PostgreSQL](https://www.postgresql.org), [SQLc](https://sqlc.dev), [Goose](https://github.com/pressly/goose), and [pgAdmin](https://www.pgadmin.org)
-- Database migration using goose
-- Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
-- Fetching and encoding of xml RSS feeds
-- Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
-- Fetching, storing and displaying JSON product data from E-Commerce websites like Shopify and WooCommerce.
+-   Building a RESTful API in Go
+-   Uses production-ready database tools like [PostgreSQL](https://www.postgresql.org), [SQLc](https://sqlc.dev), [Goose](https://github.com/pressly/goose), and [pgAdmin](https://www.pgadmin.org)
+-   Database migration using goose
+-   Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
+-   Fetching and encoding of xml RSS feeds
+-   Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
+-   Fetching, storing and displaying JSON product data from E-Commerce websites like Shopify and WooCommerce.
 
 ### Extensions added
 
-- Supports pagination of the endpoints that can return many items. Visit docs in `README.md` for more information.
+-   Supports pagination of the endpoints that can return many items. Visit docs in `README.md` for more information.
 
 ## Prerequistes
 
@@ -66,7 +66,7 @@ Kindly populate them with the correct data.
 
 ### 6. Run the migrations:
 
-- Navigate to the `sql/schema` directory of the project and run `goose postgres {{CONN}} up`
+-   Navigate to the `sql/schema` directory of the project and run `goose postgres {{CONN}} up`
 
 Where `CONN` is the connection string for your database which follow the format:
 
@@ -75,6 +75,16 @@ protocol://username:password@host:port/database
 ```
 
 **Note that if the prerequistes are not completed, then the application will fail to run (ಥ \_ ಥ)**
+
+## API Integration Tests
+
+To run these unit tests, please note that you would have to start the program using the command below:
+
+```
+go build -o out && ./out --test
+```
+
+This will only start up the API server, after which you can proceed to running the tests found in `main_test.go`
 
 ## API Documentation
 
@@ -94,18 +104,18 @@ protocol://username:password@host:port/database
 
 ## Extensions (2 weeks extra)
 
-- Support pagination of the endpoints that can return many items
-  - Use query params to allow the user to select which page they wish to see
-  - `?page=1`
-  - Each page can have a limit of 10 `LIMIT $1 OFFSET $(PageNumber * 10)`
-- Support different options for sorting and filtering posts using query parameters
-  - Add a search that searches for the post/feed (title, name, url, description)
-- Add support for other types of feeds (e.g. Atom, JSON, etc.) (WooCommerce)
-  - JSON product data when authenticated (WooCommerce) can scrape product data to add to the website
-- Add integration tests that use the API to create, read, update, and delete feeds and posts
-  - Will be used in the webUI
-- Create a simple web UI that uses your backend API
-  - Landing page containing Navbar (Products, Feeds, Posts, Followed, Liked, bookmarked)
-  - Little CSS mostly HTML
-- Add bookmarking or "liking" to posts
-  - Add extra table that marks which user liked or book marked feeds/posts
+-   Support pagination of the endpoints that can return many items
+    -   Use query params to allow the user to select which page they wish to see
+    -   `?page=1`
+    -   Each page can have a limit of 10 `LIMIT $1 OFFSET $(PageNumber * 10)`
+-   Support different options for sorting and filtering posts using query parameters
+    -   Add a search that searches for the post/feed (title, name, url, description)
+-   Add support for other types of feeds (e.g. Atom, JSON, etc.) (WooCommerce)
+    -   JSON product data when authenticated (WooCommerce) can scrape product data to add to the website
+-   Add integration tests that use the API to create, read, update, and delete feeds and posts
+    -   Will be used in the webUI
+-   Create a simple web UI that uses your backend API
+    -   Landing page containing Navbar (Products, Feeds, Posts, Followed, Liked, bookmarked)
+    -   Little CSS mostly HTML
+-   Add bookmarking or "liking" to posts
+    -   Add extra table that marks which user liked or book marked feeds/posts
