@@ -245,6 +245,24 @@ func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*ht
 	return res, nil
 }
 
+func UCreateFeed(ApiKey string) database.Feed {
+	var buffer bytes.Buffer
+	json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
+		Name: "test_feed_xyz_123_456",
+		URL:  "no_one.would_have_this_name.com",
+	})
+	res, _ := UFetchHelperPost("feed", "POST", ApiKey, &buffer)
+	defer res.Body.Close()
+	respBody, _ := io.ReadAll(res.Body)
+	type FeedCreation struct {
+		Feed       database.Feed       `json:"feed"`
+		FeedFollow database.FeedFollow `json:"feed_follow"`
+	}
+	feedData := FeedCreation{}
+	json.Unmarshal(respBody, &feedData)
+	return feedData.Feed
+}
+
 func UCreateUser() database.User {
 	userBody := database.User{
 		ID:        uuid.New(),
@@ -468,6 +486,64 @@ func TestFeedCrud(t *testing.T) {
 	}
 
 	fmt.Println("Test 2 -  Fetching Feed")
+	res, err = UFetchHelper("feed_search?q=test_feed_xyz_123_456", "GET", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	feeds := []database.Feed{}
+	err = json.Unmarshal(respBody, &feeds)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if feeds[0].Name != "test_feed_xyz_123_456" {
+		t.Errorf("Expected 'test_feed_xyz_123_456' but found: " + feeds[0].Name)
+	}
 
 	fmt.Println("Test 3 - Deleting Feed & recheck")
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+	dbconfig.DB.DeleteTestFeeds(context.Background(), user.ID)
+	res, err = UFetchHelper("feed_search?q=test_feed_xyz_123_456", "GET", "")
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	feeds = []database.Feed{}
+	err = json.Unmarshal(respBody, &feeds)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if len(feeds) > 0 {
+		if feeds[0].Name != "test_feed_xyz_123_456" {
+			t.Errorf("Expected 'test_feed_xyz_123_456' but found: " + feeds[0].Name)
+		}
+	}
+	dbconfig.DB.DeleteTestUsers(context.Background(), user.ID)
+}
+
+func TestFeedFollowsCrud(t *testing.T) {
+	fmt.Println("Test 1 - Creating Feed-follows")
+	user := UCreateUser()
+	feed := UCreateFeed(user.ApiKey)
+
+	fmt.Println("Test 2 - Fetching Feed-follows")
+
+	fmt.Println("Test 3 - Deleting Feed-follows")
 }
