@@ -26,6 +26,61 @@ import (
 // and the correct database was chosen
 // all data created by tests are removed upon finish
 
+func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*http.Response, error) {
+	httpClient := http.Client{
+		Timeout: time.Second * 20,
+	}
+	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, body)
+	if auth != "" {
+		req.Header.Add("Authorization", "ApiKey "+auth)
+	}
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	return res, nil
+}
+
+func UCreateFeed(ApiKey string) database.Feed {
+	var buffer bytes.Buffer
+	json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
+		Name: "test_feed_xyz_123_456",
+		URL:  "no_one.would_have_this_name.com",
+	})
+	res, _ := UFetchHelperPost("feed", "POST", ApiKey, &buffer)
+	defer res.Body.Close()
+	respBody, _ := io.ReadAll(res.Body)
+	type FeedCreation struct {
+		Feed       database.Feed       `json:"feed"`
+		FeedFollow database.FeedFollow `json:"feed_follow"`
+	}
+	feedData := FeedCreation{}
+	json.Unmarshal(respBody, &feedData)
+	return feedData.Feed
+}
+
+func UCreateUser() database.User {
+	userBody := database.User{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      "test_abc123_xyz_def",
+	}
+	var buffer bytes.Buffer
+	json.NewEncoder(&buffer).Encode(userBody)
+	res, _ := UFetchHelperPost("users", "POST", "", &buffer)
+	defer res.Body.Close()
+	respBody, _ := io.ReadAll(res.Body)
+	userData := database.User{}
+	json.Unmarshal(respBody, &userData)
+	return userData
+}
+
 func TestDatabaseConnection(t *testing.T) {
 	fmt.Println("Test Case 1 - Invalid database url string")
 	dbconfig, err := InitConn("abc123")
@@ -223,61 +278,6 @@ func UFetchHelper(endpoint, method, auth string) (*http.Response, error) {
 		return &http.Response{}, err
 	}
 	return res, nil
-}
-
-func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*http.Response, error) {
-	httpClient := http.Client{
-		Timeout: time.Second * 20,
-	}
-	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, body)
-	if auth != "" {
-		req.Header.Add("Authorization", "ApiKey "+auth)
-	}
-	if err != nil {
-		log.Println(err)
-		return &http.Response{}, err
-	}
-	res, err := httpClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return &http.Response{}, err
-	}
-	return res, nil
-}
-
-func UCreateFeed(ApiKey string) database.Feed {
-	var buffer bytes.Buffer
-	json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
-		Name: "test_feed_xyz_123_456",
-		URL:  "no_one.would_have_this_name.com",
-	})
-	res, _ := UFetchHelperPost("feed", "POST", ApiKey, &buffer)
-	defer res.Body.Close()
-	respBody, _ := io.ReadAll(res.Body)
-	type FeedCreation struct {
-		Feed       database.Feed       `json:"feed"`
-		FeedFollow database.FeedFollow `json:"feed_follow"`
-	}
-	feedData := FeedCreation{}
-	json.Unmarshal(respBody, &feedData)
-	return feedData.Feed
-}
-
-func UCreateUser() database.User {
-	userBody := database.User{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Name:      "test_abc123_xyz_def",
-	}
-	var buffer bytes.Buffer
-	json.NewEncoder(&buffer).Encode(userBody)
-	res, _ := UFetchHelperPost("users", "POST", "", &buffer)
-	defer res.Body.Close()
-	respBody, _ := io.ReadAll(res.Body)
-	userData := database.User{}
-	json.Unmarshal(respBody, &userData)
-	return userData
 }
 
 func TestErrEndpoint(t *testing.T) {
@@ -539,11 +539,62 @@ func TestFeedCrud(t *testing.T) {
 }
 
 func TestFeedFollowsCrud(t *testing.T) {
-	fmt.Println("Test 1 - Creating Feed-follows")
+	fmt.Println("Test 1 - Creating & Fetching of Feed-follows")
 	user := UCreateUser()
 	feed := UCreateFeed(user.ApiKey)
+	var buffer bytes.Buffer
+	err := json.NewEncoder(&buffer).Encode(objects.RequestBodyFeedFollow{
+		FeedID: feed.ID.String(),
+	})
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	res, err := UFetchHelper("feed_follows", "GET", user.ApiKey)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	feedsFollows := []database.FeedFollow{}
+	err = json.Unmarshal(respBody, &feedsFollows)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if feedsFollows[0].FeedID.String() != feed.ID.String() {
+		t.Errorf("Expected '" + feed.ID.String() + "' but found: " + feedsFollows[0].FeedID.String())
+	}
 
-	fmt.Println("Test 2 - Fetching Feed-follows")
-
-	fmt.Println("Test 3 - Deleting Feed-follows")
+	fmt.Println("Test 2 - Deleting Feed-follows")
+	res, err = UFetchHelper("feed_follows/"+feedsFollows[0].ID.String(), "DELETE", user.ApiKey)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	feedsFollow := database.FeedFollow{}
+	err = json.Unmarshal(respBody, &feedsFollow)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if feedsFollow.FeedID.String() != feed.ID.String() {
+		t.Errorf("Expected '" + feed.ID.String() + "' but found: " + feedsFollow.FeedID.String())
+	}
+	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	if err != nil {
+		t.Errorf("Expected 'nil' but found: " + err.Error())
+	}
+	dbconfig.DB.DeleteTestFeeds(context.Background(), user.ID)
+	dbconfig.DB.DeleteTestUsers(context.Background(), user.ID)
 }

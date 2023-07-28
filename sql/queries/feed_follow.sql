@@ -20,7 +20,8 @@ SELECT * FROM feed_follows
 WHERE user_id = $1;
 
 -- name: DeleteFeedByID :one
-DELETE FROM feed_follows WHERE id = $1
+DELETE FROM feed_follows
+WHERE id = $1 and user_id = $2
 RETURNING *;
 
 -- >> used for tests << --

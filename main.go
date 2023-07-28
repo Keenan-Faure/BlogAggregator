@@ -58,7 +58,7 @@ func setUpAPI(dbconfig dbConfig) {
 	v1.Get("/feed_search", dbconfig.SearchFeedHandle)
 	v1.Get("/feed_follows", dbconfig.middlewareAuth(dbconfig.GetFeedFollowHandle))
 	v1.Post("/feed_follows", dbconfig.middlewareAuth(dbconfig.CreateFeedFollowHandle))
-	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.UnFollowFeedHandle)
+	v1.Delete("/feed_follows/{feedFollowID}", dbconfig.middlewareAuth(dbconfig.UnFollowFeedHandle))
 	v1.Get("/posts", dbconfig.middlewareAuth(dbconfig.GetPostFollowHandle))
 	v1.Get("/posts_search", dbconfig.SearchPostHandle)
 

@@ -91,17 +91,20 @@ func (dbconfig *dbConfig) GetFeedFollowHandle(w http.ResponseWriter, r *http.Req
 }
 
 // unfollows a feed
-func (dbconfig *dbConfig) UnFollowFeedHandle(w http.ResponseWriter, r *http.Request) {
+func (dbconfig *dbConfig) UnFollowFeedHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
 	feedFID := chi.URLParam(r, "feedFollowID")
 	feedFollowID, err := uuid.Parse(feedFID)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, "could not decode feedFollowID param")
 		return
 	}
-	feed, err := dbconfig.DB.DeleteFeedByID(r.Context(), feedFollowID)
+	feed, err := dbconfig.DB.DeleteFeedByID(r.Context(), database.DeleteFeedByIDParams{
+		ID:     feedFollowID,
+		UserID: dbUser.ID,
+	})
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
-			RespondWithError(w, http.StatusInternalServerError, "could not find record")
+			RespondWithError(w, http.StatusNotFound, "could not find record to remove")
 			return
 		}
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
@@ -128,7 +131,7 @@ func (dbconfig *dbConfig) CreateFeedFollowHandle(w http.ResponseWriter, r *http.
 	}
 	_, err = dbconfig.CheckFeedFollowExist(params.FeedID, dbUser, r)
 	if err != nil {
-		RespondWithError(w, http.StatusNotFound, err.Error())
+		RespondWithError(w, http.StatusMethodNotAllowed, err.Error())
 		return
 	}
 	feedId, err := uuid.Parse(params.FeedID)
