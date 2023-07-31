@@ -70,6 +70,90 @@ func (q *Queries) GetBookmarkByPostID(ctx context.Context, postID uuid.UUID) (Bo
 	return i, err
 }
 
+const getBookmarkPostByUserAsc = `-- name: GetBookmarkPostByUserAsc :many
+SELECT id, post_id, user_id, created_at, updated_at FROM bookmarks
+WHERE user_id = $1
+ORDER BY "updated_at" ASC
+LIMIT $2 OFFSET $3
+`
+
+type GetBookmarkPostByUserAscParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+func (q *Queries) GetBookmarkPostByUserAsc(ctx context.Context, arg GetBookmarkPostByUserAscParams) ([]Bookmark, error) {
+	rows, err := q.db.QueryContext(ctx, getBookmarkPostByUserAsc, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Bookmark
+	for rows.Next() {
+		var i Bookmark
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBookmarkPostByUserDesc = `-- name: GetBookmarkPostByUserDesc :many
+SELECT id, post_id, user_id, created_at, updated_at FROM bookmarks
+WHERE user_id = $1
+ORDER BY "updated_at" DESC
+LIMIT $2 OFFSET $3
+`
+
+type GetBookmarkPostByUserDescParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+func (q *Queries) GetBookmarkPostByUserDesc(ctx context.Context, arg GetBookmarkPostByUserDescParams) ([]Bookmark, error) {
+	rows, err := q.db.QueryContext(ctx, getBookmarkPostByUserDesc, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Bookmark
+	for rows.Next() {
+		var i Bookmark
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removeBookmarkByPostID = `-- name: RemoveBookmarkByPostID :one
 DELETE FROM bookmarks
 WHERE post_id = $1
@@ -112,11 +196,11 @@ const searchBookmarkByPostTitle = `-- name: SearchBookmarkByPostTitle :many
 SELECT bookmarks.id, bookmarks.post_id, bookmarks.user_id, bookmarks.created_at, bookmarks.updated_at FROM bookmarks
 INNER JOIN posts
 ON bookmarks.post_id = posts.id
-WHERE posts.title = $1
+WHERE posts.title SIMILAR TO $1
 `
 
-func (q *Queries) SearchBookmarkByPostTitle(ctx context.Context, title string) ([]Bookmark, error) {
-	rows, err := q.db.QueryContext(ctx, searchBookmarkByPostTitle, title)
+func (q *Queries) SearchBookmarkByPostTitle(ctx context.Context, similarToEscape string) ([]Bookmark, error) {
+	rows, err := q.db.QueryContext(ctx, searchBookmarkByPostTitle, similarToEscape)
 	if err != nil {
 		return nil, err
 	}

@@ -35,7 +35,7 @@ func DatabaseToFeed(feed database.Feed) objects.ResponseBodyFeed {
 	}
 }
 
-// converts a database.Posts into objects.ResponseBodyPosts
+// converts a []database.Posts into objects.ResponseBodyPosts
 func DatabaseToPosts(feeds []database.Post) []objects.ResponseBodyPosts {
 	response := []objects.ResponseBodyPosts{}
 	for _, value := range feeds {
@@ -48,6 +48,36 @@ func DatabaseToPosts(feeds []database.Post) []objects.ResponseBodyPosts {
 			CreatedAt:   value.CreatedAt,
 			UpdatedAt:   value.UpdatedAt,
 			PublishedAt: value.PublishedAt,
+		})
+	}
+	return response
+}
+
+// converts a []database.Bookmark into objects.ResponseBodyBookmark
+func DatabaseToBookmark(bookmarks []database.Bookmark) []objects.ResponseBodyBookmark {
+	response := []objects.ResponseBodyBookmark{}
+	for _, value := range bookmarks {
+		response = append(response, objects.ResponseBodyBookmark{
+			ID:        value.ID,
+			PostID:    value.PostID,
+			UserID:    value.UserID,
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
+		})
+	}
+	return response
+}
+
+// converts a []database.Liked into objects.ResponseBodyLiked
+func DatabaseToLiked(liked []database.Liked) []objects.ResponseBodyLiked {
+	response := []objects.ResponseBodyLiked{}
+	for _, value := range liked {
+		response = append(response, objects.ResponseBodyLiked{
+			ID:        value.ID,
+			PostID:    value.PostID,
+			UserID:    value.UserID,
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
 		})
 	}
 	return response

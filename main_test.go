@@ -26,6 +26,26 @@ import (
 // and the correct database was chosen
 // all data created by tests are removed upon finish
 
+func UFetchHelper(endpoint, method, auth string) (*http.Response, error) {
+	httpClient := http.Client{
+		Timeout: time.Second * 20,
+	}
+	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, nil)
+	if auth != "" {
+		req.Header.Add("Authorization", "ApiKey "+auth)
+	}
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return &http.Response{}, err
+	}
+	return res, nil
+}
+
 func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*http.Response, error) {
 	httpClient := http.Client{
 		Timeout: time.Second * 20,
@@ -258,26 +278,6 @@ func TestFetchWorkerWoo(t *testing.T) {
 		t.Errorf("Expected 'UpdatedAt' to be after 'time_now'")
 	}
 	dbconfig.DB.DeleteTestWooProducts(context.Background(), store_name)
-}
-
-func UFetchHelper(endpoint, method, auth string) (*http.Response, error) {
-	httpClient := http.Client{
-		Timeout: time.Second * 20,
-	}
-	req, err := http.NewRequest(method, "http://localhost:"+utils.LoadEnv("port")+"/v1/"+endpoint, nil)
-	if auth != "" {
-		req.Header.Add("Authorization", "ApiKey "+auth)
-	}
-	if err != nil {
-		log.Println(err)
-		return &http.Response{}, err
-	}
-	res, err := httpClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return &http.Response{}, err
-	}
-	return res, nil
 }
 
 func TestErrEndpoint(t *testing.T) {
