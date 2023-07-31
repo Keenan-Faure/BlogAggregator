@@ -26,6 +26,19 @@ import (
 // and the correct database was chosen
 // all data created by tests are removed upon finish
 
+func UCreatePosts(Apikey string) database.Post {
+	dbconfig, _ := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	FetchWorker(dbconfig, productfetch.ConfigShopify{}, productfetch.ConfigWoo{})
+	time.Sleep(time.Second * 5)
+
+	res, _ := UFetchHelper("posts?page=1", "GET", Apikey)
+	defer res.Body.Close()
+	respBody, _ := io.ReadAll(res.Body)
+	posts := []database.Post{}
+	json.Unmarshal(respBody, &posts)
+	return posts[0]
+}
+
 func UFetchHelper(endpoint, method, auth string) (*http.Response, error) {
 	httpClient := http.Client{
 		Timeout: time.Second * 20,
@@ -66,12 +79,19 @@ func UFetchHelperPost(endpoint, method string, auth string, body io.Reader) (*ht
 	return res, nil
 }
 
-func UCreateFeed(ApiKey string) database.Feed {
+func UCreateFeed(ApiKey string, feed objects.RequestBodyFeed) database.Feed {
 	var buffer bytes.Buffer
-	json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
-		Name: "test_feed_xyz_123_456",
-		URL:  "no_one.would_have_this_name.com",
-	})
+	if feed.Name != "" {
+		json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
+			Name: feed.Name,
+			URL:  feed.URL,
+		})
+	} else {
+		json.NewEncoder(&buffer).Encode(objects.RequestBodyFeed{
+			Name: "test_feed_xyz_123_456",
+			URL:  "no_one.would_have_this_name.com",
+		})
+	}
 	res, _ := UFetchHelperPost("feed", "POST", ApiKey, &buffer)
 	defer res.Body.Close()
 	respBody, _ := io.ReadAll(res.Body)
@@ -541,7 +561,7 @@ func TestFeedCrud(t *testing.T) {
 func TestFeedFollowsCrud(t *testing.T) {
 	fmt.Println("Test 1 - Creating & Fetching of Feed-follows")
 	user := UCreateUser()
-	feed := UCreateFeed(user.ApiKey)
+	feed := UCreateFeed(user.ApiKey, objects.RequestBodyFeed{})
 	var buffer bytes.Buffer
 	err := json.NewEncoder(&buffer).Encode(objects.RequestBodyFeedFollow{
 		FeedID: feed.ID.String(),
@@ -597,4 +617,134 @@ func TestFeedFollowsCrud(t *testing.T) {
 	}
 	dbconfig.DB.DeleteTestFeeds(context.Background(), user.ID)
 	dbconfig.DB.DeleteTestUsers(context.Background(), user.ID)
+}
+
+func TestBookmarkCrud(t *testing.T) {
+	fmt.Println("Test 1 - Creating & Fetching of Bookmarks")
+	user := UCreateUser()
+	UCreateFeed(user.ApiKey, objects.RequestBodyFeed{
+		Name: "Los Angeles Times",
+		URL:  "https://www.latimes.com/local/rss2.0.xml",
+	})
+	post := UCreatePosts(user.ApiKey)
+
+	var buffer bytes.Buffer
+	err := json.NewEncoder(&buffer).Encode(objects.RequestBodyBookmark{
+		PostID: post.ID.String(),
+	})
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	res, err := UFetchHelperPost("bookmark", "POST", user.ApiKey, &buffer)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 201 {
+		t.Errorf("Expected '201' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	bookmark := database.Bookmark{}
+	err = json.Unmarshal(respBody, &bookmark)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if bookmark.PostID.String() != post.ID.String() {
+		t.Errorf("Expected '" + bookmark.PostID.String() + "' but found: " + post.ID.String())
+	}
+
+	fmt.Println("Test 2 - Deleting Bookmarks")
+	res, err = UFetchHelper("bookmark/"+bookmark.PostID.String(), "DELETE", user.ApiKey)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	bookmark = database.Bookmark{}
+	err = json.Unmarshal(respBody, &bookmark)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if bookmark.PostID.String() != post.ID.String() {
+		t.Errorf("Expected '" + bookmark.PostID.String() + "' but found: " + post.ID.String())
+	}
+
+	dbconfig, _ := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	dbconfig.DB.DeleteTestFeeds(context.Background(), user.ID)
+	dbconfig.DB.DeleteTestUsers(context.Background(), user.ID)
+	dbconfig.DB.RemoveBookmarkByUserID(context.Background(), user.ID)
+}
+
+func TestLikedCrud(t *testing.T) {
+	fmt.Println("Test 1 - Creating & Fetching of Likes")
+	user := UCreateUser()
+	UCreateFeed(user.ApiKey, objects.RequestBodyFeed{
+		Name: "Los Angeles Times",
+		URL:  "https://www.latimes.com/local/rss2.0.xml",
+	})
+	post := UCreatePosts(user.ApiKey)
+
+	var buffer bytes.Buffer
+	err := json.NewEncoder(&buffer).Encode(objects.RequestBodyLiked{
+		PostID: post.ID.String(),
+	})
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	res, err := UFetchHelperPost("liked", "POST", user.ApiKey, &buffer)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 201 {
+		t.Errorf("Expected '201' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	liked := database.Liked{}
+	err = json.Unmarshal(respBody, &liked)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if liked.PostID.String() != post.ID.String() {
+		t.Errorf("Expected '" + liked.PostID.String() + "' but found: " + post.ID.String())
+	}
+
+	fmt.Println("Test 2 - UnLiking (Deleting likes)")
+	res, err = UFetchHelper("liked/"+liked.PostID.String(), "DELETE", user.ApiKey)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	defer res.Body.Close()
+	respBody, err = io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		t.Errorf("Expected '200' but found: " + strconv.Itoa(res.StatusCode))
+	}
+	liked = database.Liked{}
+	err = json.Unmarshal(respBody, &liked)
+	if err != nil {
+		t.Errorf("expected 'nil' but found: " + err.Error())
+	}
+	if liked.PostID.String() != post.ID.String() {
+		t.Errorf("Expected '" + liked.PostID.String() + "' but found: " + post.ID.String())
+	}
+
+	dbconfig, _ := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
+	dbconfig.DB.DeleteTestFeeds(context.Background(), user.ID)
+	dbconfig.DB.DeleteTestUsers(context.Background(), user.ID)
+	dbconfig.DB.RemoveLikedByUserID(context.Background(), user.ID)
 }

@@ -12,7 +12,8 @@ A Blog Aggregator that fetches data from remote sources
 -   Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
 -   Fetching, storing and displaying JSON product data from E-Commerce websites like Shopify and WooCommerce.
 -   Support different options for sorting and filtering posts using query parameters
--   Has integration tests that use the API to create, read, update, and delete feeds and posts
+-   Added Bookmarking & Liking to posts
+-   Has integration tests that use the API to create, read, update, and delete feeds, posts, bookmarks and likes
 
 ### Extensions added
 
@@ -114,18 +115,6 @@ This will **only** start up the API server, after which you can proceed to runni
 
 ## Extensions (2 weeks extra)
 
--   Support pagination of the endpoints that can return many items
-    -   Use query params to allow the user to select which page they wish to see
-    -   `?page=1`
-    -   Each page can have a limit of 10 `LIMIT $1 OFFSET $(PageNumber * 10)`
--   Support different options for sorting and filtering posts using query parameters
-    -   Add a search that searches for the post/feed (title, name, url, description)
--   Add support for other types of feeds (e.g. Atom, JSON, etc.) (WooCommerce)
-    -   JSON product data when authenticated (WooCommerce) can scrape product data to add to the website
--   Add integration tests that use the API to create, read, update, and delete feeds and posts
-    -   Will be used in the webUI
 -   Create a simple web UI that uses your backend API
     -   Landing page containing Navbar (Products, Feeds, Posts, Followed, Liked, bookmarked)
     -   Little CSS mostly HTML
--   Add bookmarking or "liking" to posts
-    -   Add extra table that marks which user liked or book marked feeds/posts
