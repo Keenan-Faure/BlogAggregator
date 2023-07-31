@@ -19,6 +19,196 @@ import (
 
 // v1 handlers
 
+// Likes a post
+func (dbconfig *dbConfig) LikePostHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	params, err := DecodeLikedRequestBody(r)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if LikedValidation(params) != nil {
+		RespondWithError(w, http.StatusBadRequest, "data validation error")
+		return
+	}
+	postID, err := uuid.Parse(params.PostID)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "could not decode feed_id: "+params.PostID)
+		return
+	}
+	_, err = dbconfig.DB.GetLikedByPostID(r.Context(), postID)
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
+			RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	feed_followed, err := dbconfig.DB.CreateLike(r.Context(), database.CreateLikeParams{
+		ID:        uuid.New(),
+		PostID:    postID,
+		UserID:    dbUser.ID,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusCreated, feed_followed)
+}
+
+// Gets all liked posts from the database
+func (dbconfig *dbConfig) GetAllLikedHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+		log.Println("Error decoding page param:", err)
+	}
+	liked, err := SortingQueryLiked(r, *dbconfig, page, dbUser)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(liked) == 0 {
+		RespondWithJSON(w, http.StatusOK, []objects.ResponseBodyLiked{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseToLiked(liked))
+}
+
+// Bookmarks a post
+func (dbconfig *dbConfig) BookmarkPostHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	params, err := DecodeBookmarkRequestBody(r)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if BookmarkValidation(params) != nil {
+		RespondWithError(w, http.StatusBadRequest, "data validation error")
+		return
+	}
+	postID, err := uuid.Parse(params.PostID)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "could not decode feed_id: "+params.PostID)
+		return
+	}
+	_, err = dbconfig.DB.GetBookmarkByPostID(r.Context(), postID)
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
+			RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	feed_followed, err := dbconfig.DB.CreateBookmark(r.Context(), database.CreateBookmarkParams{
+		ID:        uuid.New(),
+		PostID:    postID,
+		UserID:    dbUser.ID,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusCreated, feed_followed)
+}
+
+// Gets all liked posts from the database
+func (dbconfig *dbConfig) GetAllBookmarkHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+		log.Println("Error decoding page param:", err)
+	}
+	bookmarks, err := SortingQueryBookmarks(r, *dbconfig, page, dbUser)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(bookmarks) == 0 {
+		RespondWithJSON(w, http.StatusOK, []objects.ResponseBodyBookmark{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, DatabaseToBookmark(bookmarks))
+}
+
+// Unlikes a post
+func (dbconfig *dbConfig) UnLikePostHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	postPID := chi.URLParam(r, "postID")
+	postID, err := uuid.Parse(postPID)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "could not decode postID param")
+		return
+	}
+	post, err := dbconfig.DB.RemoveLikedByPostID(r.Context(), postID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithError(w, http.StatusNotFound, "could not find record to remove")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, post)
+}
+
+// Removes a bookmark
+func (dbconfig *dbConfig) UnBookmarkPostHandle(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	postPID := chi.URLParam(r, "postID")
+	postID, err := uuid.Parse(postPID)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "could not decode postID param")
+		return
+	}
+	post, err := dbconfig.DB.RemoveBookmarkByPostID(r.Context(), postID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithError(w, http.StatusNotFound, "could not find record to remove")
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, post)
+}
+
+// Searches for a liked post
+func (dbconfig *dbConfig) SearchLikedHandle(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("q")
+	liked, err := dbconfig.DB.SearchLikedByPostTitle(r.Context(), utils.AddSearchChar(search))
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithJSON(w, http.StatusInternalServerError, []string{})
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(liked) == 0 {
+		RespondWithJSON(w, http.StatusOK, []database.Liked{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, liked)
+}
+
+// searches for a bookmark
+func (dbconfig *dbConfig) SearchBookmarkHandle(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("q")
+	bookmarks, err := dbconfig.DB.SearchBookmarkByPostTitle(r.Context(), utils.AddSearchChar(search))
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			RespondWithJSON(w, http.StatusInternalServerError, []string{})
+			return
+		}
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(bookmarks) == 0 {
+		RespondWithJSON(w, http.StatusOK, []database.Bookmark{})
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, bookmarks)
+}
+
 // Searches the database for simular feeds
 func (dbconfig *dbConfig) SearchFeedHandle(w http.ResponseWriter, r *http.Request) {
 	search := r.URL.Query().Get("q")
@@ -401,7 +591,7 @@ func SortingQueryFeed(r *http.Request, dbconfig dbConfig, page int) ([]database.
 // helper function
 func SortingQueryPost(r *http.Request, dbconfig dbConfig, page int, dbUser database.User) ([]database.Post, error) {
 	sort := r.URL.Query().Get("sort")
-	if utils.FindSortParam(sort) == "acs" {
+	if utils.FindSortParam(sort) == "asc" {
 		posts, err := dbconfig.DB.GetPostsByUserAsc(r.Context(), database.GetPostsByUserAscParams{
 			Limit:  10,
 			Offset: int32((page - 1) * 10),
@@ -410,6 +600,44 @@ func SortingQueryPost(r *http.Request, dbconfig dbConfig, page int, dbUser datab
 		return posts, err
 	}
 	posts, err := dbconfig.DB.GetPostsByUserDesc(r.Context(), database.GetPostsByUserDescParams{
+		Limit:  10,
+		Offset: int32((page - 1) * 10),
+		UserID: dbUser.ID,
+	})
+	return posts, err
+}
+
+// helper function
+func SortingQueryLiked(r *http.Request, dbconfig dbConfig, page int, dbUser database.User) ([]database.Liked, error) {
+	sort := r.URL.Query().Get("sort")
+	if utils.FindSortParam(sort) == "asc" {
+		posts, err := dbconfig.DB.GetLikedPostByUserAsc(r.Context(), database.GetLikedPostByUserAscParams{
+			Limit:  10,
+			Offset: int32((page - 1) * 10),
+			UserID: dbUser.ID,
+		})
+		return posts, err
+	}
+	posts, err := dbconfig.DB.GetLikedPostByUserDesc(r.Context(), database.GetLikedPostByUserDescParams{
+		Limit:  10,
+		Offset: int32((page - 1) * 10),
+		UserID: dbUser.ID,
+	})
+	return posts, err
+}
+
+// helper function
+func SortingQueryBookmarks(r *http.Request, dbconfig dbConfig, page int, dbUser database.User) ([]database.Bookmark, error) {
+	sort := r.URL.Query().Get("sort")
+	if utils.FindSortParam(sort) == "asc" {
+		posts, err := dbconfig.DB.GetBookmarkPostByUserAsc(r.Context(), database.GetBookmarkPostByUserAscParams{
+			Limit:  10,
+			Offset: int32((page - 1) * 10),
+			UserID: dbUser.ID,
+		})
+		return posts, err
+	}
+	posts, err := dbconfig.DB.GetBookmarkPostByUserDesc(r.Context(), database.GetBookmarkPostByUserDescParams{
 		Limit:  10,
 		Offset: int32((page - 1) * 10),
 		UserID: dbUser.ID,

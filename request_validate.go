@@ -59,9 +59,47 @@ func DecodeFeedFollowRequestBody(r *http.Request) (objects.RequestBodyFeedFollow
 	return params, nil
 }
 
+// Liked: decodes the request body
+func DecodeLikedRequestBody(r *http.Request) (objects.RequestBodyLiked, error) {
+	decoder := json.NewDecoder(r.Body)
+	params := objects.RequestBodyLiked{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		return params, err
+	}
+	return params, nil
+}
+
+// Bookmark: decodes the request body
+func DecodeBookmarkRequestBody(r *http.Request) (objects.RequestBodyBookmark, error) {
+	decoder := json.NewDecoder(r.Body)
+	params := objects.RequestBodyBookmark{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		return params, err
+	}
+	return params, nil
+}
+
 // FeedFollow: validation
 func FeedFollowValidation(feed objects.RequestBodyFeedFollow) error {
 	if feed.FeedID == "" {
+		return errors.New("empty feed_id not allowed")
+	}
+	return nil
+}
+
+// Liked: validation
+func LikedValidation(post objects.RequestBodyLiked) error {
+	if post.PostID == "" {
+		return errors.New("empty feed_id not allowed")
+	}
+	return nil
+}
+
+// Bookmark: validation
+func BookmarkValidation(post objects.RequestBodyBookmark) error {
+	if post.PostID == "" {
 		return errors.New("empty feed_id not allowed")
 	}
 	return nil

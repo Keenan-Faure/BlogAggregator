@@ -70,6 +70,90 @@ func (q *Queries) GetLikedByPostID(ctx context.Context, postID uuid.UUID) (Liked
 	return i, err
 }
 
+const getLikedPostByUserAsc = `-- name: GetLikedPostByUserAsc :many
+SELECT id, post_id, user_id, created_at, updated_at FROM liked
+WHERE user_id = $1
+ORDER BY "updated_at" ASC
+LIMIT $2 OFFSET $3
+`
+
+type GetLikedPostByUserAscParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+func (q *Queries) GetLikedPostByUserAsc(ctx context.Context, arg GetLikedPostByUserAscParams) ([]Liked, error) {
+	rows, err := q.db.QueryContext(ctx, getLikedPostByUserAsc, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Liked
+	for rows.Next() {
+		var i Liked
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLikedPostByUserDesc = `-- name: GetLikedPostByUserDesc :many
+SELECT id, post_id, user_id, created_at, updated_at FROM liked
+WHERE user_id = $1
+ORDER BY "updated_at" DESC
+LIMIT $2 OFFSET $3
+`
+
+type GetLikedPostByUserDescParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+func (q *Queries) GetLikedPostByUserDesc(ctx context.Context, arg GetLikedPostByUserDescParams) ([]Liked, error) {
+	rows, err := q.db.QueryContext(ctx, getLikedPostByUserDesc, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Liked
+	for rows.Next() {
+		var i Liked
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removeLikedByPostID = `-- name: RemoveLikedByPostID :one
 DELETE FROM liked
 WHERE post_id = $1
@@ -112,11 +196,11 @@ const searchLikedByPostTitle = `-- name: SearchLikedByPostTitle :many
 SELECT liked.id, liked.post_id, liked.user_id, liked.created_at, liked.updated_at FROM liked
 INNER JOIN posts
 ON liked.post_id = posts.id
-WHERE posts.title = $1
+WHERE posts.title SIMILAR TO $1
 `
 
-func (q *Queries) SearchLikedByPostTitle(ctx context.Context, title string) ([]Liked, error) {
-	rows, err := q.db.QueryContext(ctx, searchLikedByPostTitle, title)
+func (q *Queries) SearchLikedByPostTitle(ctx context.Context, similarToEscape string) ([]Liked, error) {
+	rows, err := q.db.QueryContext(ctx, searchLikedByPostTitle, similarToEscape)
 	if err != nil {
 		return nil, err
 	}

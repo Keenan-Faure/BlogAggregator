@@ -47,6 +47,22 @@ type ResponseBodyPosts struct {
 	PublishedAt time.Time `json:"published_at"`
 }
 
+type ResponseBodyBookmark struct {
+	ID        uuid.UUID `json:"id"`
+	PostID    uuid.UUID `json:"post_id"`
+	UserID    uuid.UUID `json:"user_ud"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type ResponseBodyLiked struct {
+	ID        uuid.UUID `json:"id"`
+	PostID    uuid.UUID `json:"post_id"`
+	UserID    uuid.UUID `json:"user_ud"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type RequestBodyUser struct {
 	Name string `json:"name"`
 }
@@ -60,6 +76,13 @@ type RequestBodyFeedFollow struct {
 	FeedID string `json:"feed_id"`
 }
 
+type RequestBodyLiked struct {
+	PostID string `json:"post_id"`
+}
+
+type RequestBodyBookmark struct {
+	PostID string `json:"post_id"`
+}
 type ReadyHandle struct {
 	Status string `json:"status"`
 }

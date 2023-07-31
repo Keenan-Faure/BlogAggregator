@@ -18,7 +18,19 @@ WHERE post_id = $1;
 SELECT bookmarks.* FROM bookmarks
 INNER JOIN posts
 ON bookmarks.post_id = posts.id
-WHERE posts.title = $1;
+WHERE posts.title SIMILAR TO $1;
+
+-- name: GetBookmarkPostByUserDesc :many
+SELECT * FROM bookmarks
+WHERE user_id = $1
+ORDER BY "updated_at" DESC
+LIMIT $2 OFFSET $3;
+
+-- name: GetBookmarkPostByUserAsc :many
+SELECT * FROM bookmarks
+WHERE user_id = $1
+ORDER BY "updated_at" ASC
+LIMIT $2 OFFSET $3;
 
 -- name: RemoveBookmarkByPostID :one
 DELETE FROM bookmarks
