@@ -18,7 +18,6 @@ function login() {
  * Login function for the user
  */
 function registers() {
-    console.log;
     fetchEndpoint(
         "users",
         "POST",

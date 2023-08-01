@@ -84,7 +84,7 @@ function Message(message, responseCode) {
     if (![200, 201].includes(responseCode)) {
         button.style.background = "linear-gradient(rgb(209, 125, 125), red)";
     } else {
-        button.style.background = "linear-gradient(rgb(125 209 159), #00ff14);";
+        button.style.background = "linear-gradient(rgb(28, 243, 233), blue)";
     }
     button.innerHTML = message;
 

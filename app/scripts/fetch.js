@@ -34,8 +34,11 @@ const fetchEndpoint = async function (
         body: JSON.stringify(bodyData),
     });
     const json = await resp.json();
-    if(resp.status )
-    Message(json.error);
+    if (![200, 201].includes(resp.status)) {
+        Message(json.error, resp.status);
+    } else if ([200, 201].includes(resp.status)) {
+        Message("Success", resp.status);
+    }
     return json;
 };
 
