@@ -12,7 +12,7 @@ RETURNING *;
 SELECT * FROM users
 WHERE api_key = $1;
 
--- name: GetUser :one
+-- name: GetUserByName :one
 select * from users
 WHERE "name" = $1;
 
