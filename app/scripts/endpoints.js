@@ -2,13 +2,14 @@
  * Login function for the user
  */
 function login() {
-    const json = fetchEndpoint(
+    fetchEndpoint(
         "users",
         "GET",
         {
             Authorization:
                 "ApiKey " + document.getElementById("login.psw").value,
         },
+        {},
         {}
     );
 }
@@ -16,6 +17,15 @@ function login() {
 /**
  * Login function for the user
  */
-function register() {
-    json = fetchEndpoint("users", "POST", {}, {});
+function registers() {
+    console.log;
+    fetchEndpoint(
+        "users",
+        "POST",
+        {},
+        {},
+        {
+            name: document.getElementById("register.name").value,
+        }
+    );
 }
