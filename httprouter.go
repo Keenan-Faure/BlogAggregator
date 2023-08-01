@@ -492,7 +492,7 @@ func RespondWithError(w http.ResponseWriter, code int, msg string) error {
 // helper function
 // checks if a username already exists inside database
 func (dbconfig *dbConfig) CheckUserExist(name string, r *http.Request) (bool, error) {
-	username, err := dbconfig.DB.GetUser(r.Context(), name)
+	username, err := dbconfig.DB.GetUserByName(r.Context(), name)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
 			return false, err

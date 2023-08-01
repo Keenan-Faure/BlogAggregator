@@ -17,6 +17,8 @@ type dbConfig struct {
 	DB *database.Queries
 }
 
+const file_path = "./app"
+
 func main() {
 	dbconfig, err := InitConn(utils.LoadEnv("db_url") + utils.LoadEnv("database") + "?sslmode=disable")
 	if err != nil {
@@ -73,6 +75,12 @@ func setUpAPI(dbconfig dbConfig) {
 	v1.Get("/", dbconfig.Endpoints)
 	r.Mount("/v1", v1)
 
+	// file server
+	fs := http.FileServer(http.Dir(file_path))
+	fsHandle := http.StripPrefix("/app", fs)
+	r.Handle("/app", fsHandle)
+	r.Handle("/app/*", fsHandle)
+
 	port := utils.LoadEnv("port")
 	if port == "" {
 		log.Fatal("Port not defined in Environment")
@@ -82,6 +90,6 @@ func setUpAPI(dbconfig dbConfig) {
 		Addr:    ":" + port,
 		Handler: r,
 	}
-	log.Printf("Listening on port %s", port)
+	log.Printf("Serving files from %s and listening on port %s", file_path, port)
 	log.Fatal(server.ListenAndServe())
 }
