@@ -12,13 +12,15 @@
  * @param {string} method HTTP Option either `GET`, `POST`, `PUT`, `DELETE`
  * @param {Object} headers Array of headers to be sent along with request
  * @param {Object} params Array of params to be sent as query_params with the request
- * @returns {Promise<any>}
+ * @param {Object} bodyData Object containing key-value pairs to be sent with POST request
+ * @returns {any}
  */
 const fetchEndpoint = async function (
     endpoint,
     method,
     headers = {},
-    params = {}
+    params = {},
+    bodyData = {}
 ) {
     let url = createURL(endpoint, params);
     const resp = await fetch(url, {
@@ -29,11 +31,11 @@ const fetchEndpoint = async function (
         headers: AppendHeaders(headers),
         redirect: "follow", // manual, *follow, error
         referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(bodyData),
     });
     const json = await resp.json();
-    if (![200, 201].includes(resp.status)) {
-        errorMessage(json.error);
-    }
+    if(resp.status )
+    Message(json.error);
     return json;
 };
 

@@ -7,7 +7,7 @@
 function createRegister(element) {
     if (!registerExists()) {
         let register_name = document.createElement("input");
-        register_name.id = "register";
+        register_name.id = "register.name";
         register_name.type = "text";
         register_name = appendStyleInput(register_name);
 
@@ -15,8 +15,8 @@ function createRegister(element) {
         register_tag.innerHTML = "Name: ";
 
         let register_button = document.createElement("button");
-        register_button.onclick = register;
         register_button = appendStyleBtn(register_button);
+        register_button.setAttribute("onclick", "registers()");
         register_button.innerHTML = "Register";
 
         element.insertAdjacentElement("afterend", register_button);
@@ -66,9 +66,10 @@ function appendStyleBtn(button_element) {
 
 /**
  * Creates an error message on the screen
- * @param {string} message
+ * @param {string} message Message from response
+ * @param {Number} responseCode Response code
  */
-function errorMessage(message) {
+function Message(message, responseCode) {
     let button = document.createElement("button");
     /** styles button */
     button.style.zIndex = "5";
@@ -80,7 +81,11 @@ function errorMessage(message) {
     button.style.opacity = "0.9";
     button.style.padding = "4px 12px";
     button.style.borderRadius = "5px";
-    button.style.background = "linear-gradient(rgb(209, 125, 125), red)";
+    if (![200, 201].includes(responseCode)) {
+        button.style.background = "linear-gradient(rgb(209, 125, 125), red)";
+    } else {
+        button.style.background = "linear-gradient(rgb(125 209 159), #00ff14);";
+    }
     button.innerHTML = message;
 
     referenceNode = document.body;
