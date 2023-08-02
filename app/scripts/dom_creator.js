@@ -67,9 +67,9 @@ function appendStyleBtn(button_element) {
 /**
  * Creates an error message on the screen
  * @param {string} message Message from response
- * @param {Number} responseCode Response code
+ * @param {Number} responseCode Response from API
  */
-function Message(message, responseCode) {
+function Message(message, response) {
 	let button = document.createElement("button");
 	/** styles button */
 	button.style.zIndex = "5";
@@ -81,7 +81,7 @@ function Message(message, responseCode) {
 	button.style.opacity = "0.9";
 	button.style.padding = "4px 12px";
 	button.style.borderRadius = "5px";
-	if (![200, 201, 202].includes(responseCode)) {
+	if (isError(response)) {
 		button.style.background = "linear-gradient(rgb(209, 125, 125), red)";
 	} else {
 		button.style.background = "linear-gradient(rgb(28, 243, 233), blue)";

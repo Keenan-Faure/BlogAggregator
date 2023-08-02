@@ -33,9 +33,9 @@ const getEndpoint = async function (
 	const json = await resp.json();
 	console.log(json);
 	console.log(endpoint);
-	let adHocMessage = EndpointAdHoc(endpoint, method, json);
+	let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
 	if (adHocMessage != "undefined") {
-		Message(adHocMessage, resp.status);
+		Message(adHocMessage, resp);
 	}
 	return json;
 };
@@ -78,9 +78,9 @@ const postEndpoint = async function (
 	const json = await resp.json();
 	console.log(json);
 	console.log(endpoint);
-	let adHocMessage = EndpointAdHoc(endpoint, method, json);
+	let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
 	if (adHocMessage != "undefined") {
-		Message(adHocMessage, resp.status);
+		Message(adHocMessage, resp);
 	}
 	return json;
 };
@@ -88,15 +88,22 @@ const postEndpoint = async function (
 /**
  *
  * @param {string} endpoint endpoint that was queried
- * @param {any} json response from API
+ * @param {string} method HTTP method
+ * @param {any} json JSON response from API
+ * @param {Response} response response from API
  * @returns {string}
  */
-function EndpointAdHoc(endpoint, method, json) {
+function EndpointAdHoc(endpoint, method, json, response) {
 	if ((endpoint == "users" && method) == "GET") {
-		setTimeout(() => {
-			window.location.href = "app/dashboard.html";
-		}, 500);
-		return "Success";
+		console.log(!isError(response));
+		if (!isError(response)) {
+			setTimeout(() => {
+				localStorage.setItem("api_key", json.api_key);
+				window.location.href = "app/dashboard.html";
+			}, 500);
+			return "Success";
+		}
+		return "undefined";
 	} else if (endpoint == "users" && method == "POST") {
 		document.getElementById("login.psw").value = json.api_key;
 		localStorage.setItem("api_key", json.api_key);
@@ -146,6 +153,9 @@ function AppendHeaders(headers) {
 	return headers;
 }
 
-// sessionStorage.setItem("lastname", "Smith");
-// let personName = sessionStorage.getItem("lastname");
-// document.getElementById("demo").innerHTML = personName;
+function isError(response) {
+	if ([200, 201, 202].includes(response.status)) {
+		return false;
+	}
+	return true;
+}
