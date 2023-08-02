@@ -1,1 +1,36 @@
-<p>Welcome to the dashboard :^)</p>
+<html>
+	<style>
+		.blocks {
+			background-color: grey;
+			text-align: center;
+			position: relative;
+			display: inline;
+			padding: 10px;
+			cursor: pointer;
+			transition-duration: 0.3s;
+		}
+		.blocks:hover {
+			background-color: rgb(186, 186, 186);
+		}
+	</style>
+	<body>
+		<div
+			style="
+				position: relative;
+				width: fit-content;
+				top: 10%;
+				left: 50%;
+				transform: translate(-50%, 0);
+			"
+		>
+			<p style="text-align: center">Welcome to your dashboard!</p>
+			<hr />
+			<br />
+			<div class="blocks">Feeds</div>
+			<div class="blocks">Followed Feeds</div>
+			<div class="blocks">Posts</div>
+			<div class="blocks">Bookmarks</div>
+			<div class="blocks">Liked</div>
+		</div>
+	</body>
+</html>
