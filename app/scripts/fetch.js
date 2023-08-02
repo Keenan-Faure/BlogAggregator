@@ -99,6 +99,7 @@ function EndpointAdHoc(endpoint, method, json) {
 		return "Success";
 	} else if (endpoint == "users" && method == "POST") {
 		document.getElementById("login.psw").value = json.api_key;
+		localStorage.setItem("api_key", json.api_key);
 		return "Pasted token inside password";
 	}
 }
