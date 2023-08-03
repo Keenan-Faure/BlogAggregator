@@ -116,6 +116,12 @@ function EndpointAdHoc(endpoint, method, json, response) {
 			return json.error;
 		}
 		return "Success";
+	} else if (endpoint == "posts" && method == "GET") {
+		if (isError(response)) {
+			return json.error;
+		}
+		createPosts(json);
+		return "Success";
 	}
 }
 
@@ -164,9 +170,20 @@ function AppendHeaders(headers) {
 	return headers;
 }
 
+/**
+ * Determines if the response contains an error or not
+ * @param {any} response Response received from the API request
+ * @returns
+ */
 function isError(response) {
 	if ([200, 201, 202].includes(response.status)) {
 		return false;
 	}
 	return true;
+}
+
+function getQueryParam(key) {
+	url = new URL(window.location.href);
+	let searchParams = url.searchParams;
+	return searchParams.get(key);
 }
