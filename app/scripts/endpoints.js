@@ -27,3 +27,20 @@ function registers() {
 		}
 	);
 }
+
+/**
+ * Fetch Feeds for user
+ */
+function feed(api_key) {
+	getEndpoint(
+		"feed",
+		"GET",
+		{
+			Authorization: "ApiKey " + api_key,
+		},
+		{
+			page: "1",
+			sort: "asc",
+		}
+	);
+}
