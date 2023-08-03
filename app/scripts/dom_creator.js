@@ -1,4 +1,35 @@
 /**
+ * Creates a list of posts from JSON data received over the API
+ * @param {any} json
+ * @returns {null}
+ */
+function createPosts(json) {}
+
+/**
+ * Creates a list of feeds from JSON data received over the API
+ * @param {any} json
+ * @returns {null}
+ */
+function createFeeds(json) {
+	for (let i = 0; i < json.length; ++i) {
+		let block = document.createElement("div");
+		block.id = json[i].id;
+		block.classList.add("blocks");
+		let url = document.createElement("div");
+		url.classList.add("scrape-text");
+		url.innerHTML = json[i].url;
+		let name = document.createElement("div");
+		name.classList.add("scrape-text");
+		name.innerHTML = json[i].name;
+
+		block.appendChild(url);
+		block.appendChild(name);
+
+		document.getElementById("main").appendChild(block);
+	}
+}
+
+/**
  * Creates Registration DOM inside HTML body
  *
  * @param {HTMLElement} element Element that triggers the creation of the register element
