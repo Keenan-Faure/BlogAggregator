@@ -44,3 +44,21 @@ function feed(api_key) {
 		}
 	);
 }
+
+/**
+ * Adds a new feed to the database for the user
+ */
+function createFeed(api_key) {
+	postEndpoint(
+		"feed",
+		"POST",
+		{
+			Authorization: "ApiKey " + api_key,
+		},
+		{},
+		{
+			name: document.getElementById("feed.name").value,
+			url: document.getElementById("feed.url").value,
+		}
+	);
+}

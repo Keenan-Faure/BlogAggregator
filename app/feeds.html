@@ -3,8 +3,8 @@
 		<style>
 			.general_container {
 				position: relative;
-				width: fit-content;
-				top: 10%;
+				width: 40%;
+				top: 5%;
 				left: 50%;
 				transform: translate(-50%, 0);
 			}
@@ -27,18 +27,46 @@
 				white-space: nowrap;
 				overflow: hidden;
 			}
+			.add-new {
+				position: absolute;
+				top: 10%;
+				left: 40%;
+				transform: translate(-50%, 0);
+			}
+			input[type="text"] {
+				border: 1px solid black;
+				left: 50%;
+				position: relative;
+				transform: translate(-50%, 0);
+			}
 		</style>
 		<script src="/app/scripts/dom_creator.js"></script>
 		<script src="/app/scripts/endpoints.js"></script>
 		<script src="/app/scripts/fetch.js"></script>
 		<script>
 			let data = feed(localStorage.getItem("api_key"));
-			createFeeds(data);
-			//make request to get data and display
 		</script>
 	</head>
 	<body>
 		<div class="general_container">
+			<p style="text-align: center">Name:</p>
+			<input type="text" id="feed.name" />
+			<p style="text-align: center">URL:</p>
+			<input type="text" id="feed.url" />
+			<br /><br />
+			<button
+				style="
+					position: relative;
+					left: 50%;
+					transform: translate(-50%, 0%);
+				"
+				onclick="createFeed(localStorage.getItem('api_key'))"
+			>
+				Add Feed
+			</button>
+			<br />
+			<br />
+			<br />
 			<p style="text-align: center">Bookmarked Posts</p>
 			<hr />
 			<div id="main" style="position: relative; width: 100%"></div>
