@@ -31,8 +31,6 @@ const getEndpoint = async function (
 		referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
 	});
 	const json = await resp.json();
-	console.log(json);
-	console.log(endpoint);
 	let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
 	if (adHocMessage != "undefined") {
 		Message(adHocMessage, resp);
@@ -95,7 +93,6 @@ const postEndpoint = async function (
  */
 function EndpointAdHoc(endpoint, method, json, response) {
 	if ((endpoint == "users" && method) == "GET") {
-		console.log(!isError(response));
 		if (!isError(response)) {
 			setTimeout(() => {
 				localStorage.setItem("api_key", json.api_key);
@@ -108,6 +105,12 @@ function EndpointAdHoc(endpoint, method, json, response) {
 		document.getElementById("login.psw").value = json.api_key;
 		localStorage.setItem("api_key", json.api_key);
 		return "Pasted token inside password";
+	} else if (endpoint == "feed" && method == "GET") {
+		if (!isError(response)) {
+			createFeeds(json);
+			return "fetch successful";
+		}
+		return "undefined";
 	}
 }
 
@@ -136,9 +139,9 @@ function appendParams(url, params) {
 		url += "?";
 	}
 	for (const key in params) {
-		url += key + "=" + params[key];
+		url += key + "=" + params[key] + "&";
 	}
-	return url;
+	return url.slice(0, -1);
 }
 
 /**
