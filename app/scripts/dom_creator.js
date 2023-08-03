@@ -17,13 +17,38 @@ function createFeeds(json) {
 		block.classList.add("blocks");
 		let url = document.createElement("div");
 		url.classList.add("scrape-text");
-		url.innerHTML = json[i].url;
+		url.innerHTML = "URL: " + json[i].url;
 		let name = document.createElement("div");
 		name.classList.add("scrape-text");
-		name.innerHTML = json[i].name;
+		name.innerHTML = "Name: " + json[i].name;
 
 		block.appendChild(url);
 		block.appendChild(name);
+
+		document.getElementById("main").appendChild(block);
+	}
+}
+
+function createPosts(json) {
+	for (let i = 0; i < json.length; ++i) {
+		let block = document.createElement("div");
+		block.id = json[i].id;
+		block.classList.add("blocks");
+		let url = document.createElement("div");
+		url.classList.add("scrape-text");
+		url.innerHTML = "URL: " + json[i].url;
+		let name = document.createElement("div");
+		name.classList.add("scrape-text");
+		name.innerHTML = "Title: " + json[i].title;
+		let published_at = document.createElement("div");
+		published_at.classList.add("scrape-text");
+		published_at.innerHTML = "Publish Date: " + json[i].published_at;
+
+		block.appendChild(url);
+		block.appendChild(name);
+		block.appendChild(published_at);
+
+		document.getElementById("main").appendChild(block);
 
 		document.getElementById("main").appendChild(block);
 	}

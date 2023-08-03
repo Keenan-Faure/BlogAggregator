@@ -62,3 +62,20 @@ function createFeed(api_key) {
 		}
 	);
 }
+
+/**
+ * Fetches posts for the user
+ */
+function posts(api_key, page) {
+	getEndpoint(
+		"posts",
+		"GET",
+		{
+			Authorization: "ApiKey " + api_key,
+		},
+		{
+			page: page,
+			sort: "desc",
+		}
+	);
+}
