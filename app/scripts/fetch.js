@@ -111,6 +111,11 @@ function EndpointAdHoc(endpoint, method, json, response) {
 			return "fetch successful";
 		}
 		return "undefined";
+	} else if (endpoint == "feed" && method == "POST") {
+		if (isError(response)) {
+			return json.error;
+		}
+		return "Success";
 	}
 }
 
@@ -140,6 +145,9 @@ function appendParams(url, params) {
 	}
 	for (const key in params) {
 		url += key + "=" + params[key] + "&";
+	}
+	if (Object.keys(params).length == 0) {
+		return url;
 	}
 	return url.slice(0, -1);
 }
