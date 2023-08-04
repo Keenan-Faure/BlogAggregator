@@ -32,7 +32,7 @@ func (dbconfig *dbConfig) LikePostHandle(w http.ResponseWriter, r *http.Request,
 	}
 	postID, err := uuid.Parse(params.PostID)
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, "could not decode feed_id: "+params.PostID)
+		RespondWithError(w, http.StatusBadRequest, "could not decode post_id: "+params.PostID)
 		return
 	}
 	_, err = dbconfig.DB.GetLikedByPostID(r.Context(), postID)
