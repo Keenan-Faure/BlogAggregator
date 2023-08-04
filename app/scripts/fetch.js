@@ -15,27 +15,27 @@
  * @returns {any}
  */
 const getEndpoint = async function (
-	endpoint,
-	method,
-	headers = {},
-	params = {}
+    endpoint,
+    method,
+    headers = {},
+    params = {}
 ) {
-	let url = createURL(endpoint, params);
-	const resp = await fetch(url, {
-		method: method, // *GET, POST, PUT, DELETE, etc.
-		mode: "cors", // no-cors, *cors, same-origin
-		cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-		credentials: "include", // include, *same-origin, omit
-		headers: AppendHeaders(headers),
-		redirect: "follow", // manual, *follow, error
-		referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-	});
-	const json = await resp.json();
-	let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
-	if (adHocMessage != "undefined") {
-		Message(adHocMessage, resp);
-	}
-	return json;
+    let url = createURL(endpoint, params);
+    const resp = await fetch(url, {
+        method: method, // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "include", // include, *same-origin, omit
+        headers: AppendHeaders(headers),
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    });
+    const json = await resp.json();
+    let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
+    if (adHocMessage != "undefined") {
+        Message(adHocMessage, resp);
+    }
+    return json;
 };
 
 /**
@@ -56,31 +56,31 @@ const getEndpoint = async function (
  * @returns {any}
  */
 const postEndpoint = async function (
-	endpoint,
-	method,
-	headers = {},
-	params = {},
-	bodyData = {}
+    endpoint,
+    method,
+    headers = {},
+    params = {},
+    bodyData = {}
 ) {
-	let url = createURL(endpoint, params);
-	const resp = await fetch(url, {
-		method: method, // *GET, POST, PUT, DELETE, etc.
-		mode: "cors", // no-cors, *cors, same-origin
-		cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-		credentials: "include", // include, *same-origin, omit
-		headers: AppendHeaders(headers),
-		redirect: "follow", // manual, *follow, error
-		referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-		body: JSON.stringify(bodyData),
-	});
-	const json = await resp.json();
-	console.log(json);
-	console.log(endpoint);
-	let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
-	if (adHocMessage != "undefined") {
-		Message(adHocMessage, resp);
-	}
-	return json;
+    let url = createURL(endpoint, params);
+    const resp = await fetch(url, {
+        method: method, // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "include", // include, *same-origin, omit
+        headers: AppendHeaders(headers),
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(bodyData),
+    });
+    const json = await resp.json();
+    console.log(json);
+    console.log(endpoint);
+    let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
+    if (adHocMessage != "undefined") {
+        Message(adHocMessage, resp);
+    }
+    return json;
 };
 
 /**
@@ -92,37 +92,73 @@ const postEndpoint = async function (
  * @returns {string}
  */
 function EndpointAdHoc(endpoint, method, json, response) {
-	if ((endpoint == "users" && method) == "GET") {
-		if (!isError(response)) {
-			setTimeout(() => {
-				localStorage.setItem("api_key", json.api_key);
-				window.location.href = "app/dashboard.html";
-			}, 500);
-			return "Success";
-		}
-		return "undefined";
-	} else if (endpoint == "users" && method == "POST") {
-		document.getElementById("login.psw").value = json.api_key;
-		localStorage.setItem("api_key", json.api_key);
-		return "Pasted token inside password";
-	} else if (endpoint == "feed" && method == "GET") {
-		if (!isError(response)) {
-			createFeeds(json);
-			return "fetch successful";
-		}
-		return "undefined";
-	} else if (endpoint == "feed" && method == "POST") {
-		if (isError(response)) {
-			return json.error;
-		}
-		return "Success";
-	} else if (endpoint == "posts" && method == "GET") {
-		if (isError(response)) {
-			return json.error;
-		}
-		createPosts(json);
-		return "Success";
-	}
+    if ((endpoint == "users" && method) == "GET") {
+        if (!isError(response)) {
+            setTimeout(() => {
+                localStorage.setItem("api_key", json.api_key);
+                window.location.href = "app/dashboard.html";
+            }, 500);
+            return "Success";
+        }
+        return "undefined";
+    } else if (endpoint == "users" && method == "POST") {
+        if (!isError(response)) {
+            document.getElementById("login.psw").value = json.api_key;
+            localStorage.setItem("api_key", json.api_key);
+            return "Pasted token inside password";
+        }
+        return json.error;
+    } else if (endpoint == "feed" && method == "GET") {
+        if (!isError(response)) {
+            createFeeds(json);
+            return "fetch successful";
+        }
+        return "undefined";
+    } else if (endpoint == "feed" && method == "POST") {
+        if (isError(response)) {
+            return json.error;
+        }
+        return "Success";
+    } else if (endpoint == "posts" && method == "GET") {
+        if (isError(response)) {
+            return json.error;
+        }
+        createPosts(json);
+        return "Success";
+    } else if (endpoint == "bookmark" && method == "GET") {
+        if (isError(response)) {
+            return json.error;
+        }
+        createBookmarks(json);
+        return "Success";
+    } else if (endpoint == "liked" && method == "GET") {
+        if (isError(response)) {
+            return json.error;
+        }
+        createLikes(json);
+        return "Success";
+    } else if (endpoint == "bookmark" && method == "POST") {
+        if (isError(response)) {
+            return json.error;
+        }
+        return "Success";
+    } else if (endpoint == "liked" && method == "POST") {
+        if (isError(response)) {
+            return json.error;
+        }
+        return "Success";
+    } else if (endpoint == "feed_follows" && method == "GET") {
+        if (isError(response)) {
+            return json.error;
+        }
+        createFeedFollows(json);
+        return "Success";
+    } else if (endpoint == "feed_follows" && method == "POST") {
+        if (isError(response)) {
+            return json.error;
+        }
+        return "Success";
+    }
 }
 
 /**
@@ -133,9 +169,9 @@ function EndpointAdHoc(endpoint, method, json, response) {
  * @returns {string}
  */
 function createURL(endpoint, params) {
-	arrayUrl = document.URL.split("/");
-	url = "http://" + arrayUrl[2] + "/v1/" + endpoint;
-	return appendParams(url, params);
+    arrayUrl = document.URL.split("/");
+    url = "http://" + arrayUrl[2] + "/v1/" + endpoint;
+    return appendParams(url, params);
 }
 
 /**
@@ -146,16 +182,16 @@ function createURL(endpoint, params) {
  * @returns {string}
  */
 function appendParams(url, params) {
-	if (Object.keys(params).length !== 0) {
-		url += "?";
-	}
-	for (const key in params) {
-		url += key + "=" + params[key] + "&";
-	}
-	if (Object.keys(params).length == 0) {
-		return url;
-	}
-	return url.slice(0, -1);
+    if (Object.keys(params).length !== 0) {
+        url += "?";
+    }
+    for (const key in params) {
+        url += key + "=" + params[key] + "&";
+    }
+    if (Object.keys(params).length == 0) {
+        return url;
+    }
+    return url.slice(0, -1);
 }
 
 /**
@@ -165,9 +201,9 @@ function appendParams(url, params) {
  * @return {Object}
  */
 function AppendHeaders(headers) {
-	headers["Access-Control-Allow-Origin"] = "*";
-	headers["Content-Type"] = "application/json";
-	return headers;
+    headers["Access-Control-Allow-Origin"] = "*";
+    headers["Content-Type"] = "application/json";
+    return headers;
 }
 
 /**
@@ -176,14 +212,50 @@ function AppendHeaders(headers) {
  * @returns
  */
 function isError(response) {
-	if ([200, 201, 202].includes(response.status)) {
-		return false;
-	}
-	return true;
+    if ([200, 201, 202].includes(response.status)) {
+        return false;
+    }
+    return true;
 }
 
+/**
+ * Retrieves the value of the key query param in the url
+ * @param {string} key query param to retrieve the value of
+ * @returns {string}
+ */
 function getQueryParam(key) {
-	url = new URL(window.location.href);
-	let searchParams = url.searchParams;
-	return searchParams.get(key);
+    url = new URL(window.location.href);
+    let searchParams = url.searchParams;
+    return searchParams.get(key);
+}
+
+/**
+ * Calculates the next page based on the current
+ * @returns {string}
+ */
+function nextPage() {
+    let crrUrl = new URL(window.location.href);
+    window.location.href =
+        "http://" +
+        crrUrl.host +
+        crrUrl.pathname +
+        "?page=" +
+        (parseInt(getQueryParam("page")) + 1);
+}
+
+/**
+ * Calculates the previous page based on the current
+ * @returns {string}
+ */
+function prevPage() {
+    let crrUrl = new URL(window.location.href);
+    if (getQueryParam("page") != 1) {
+        window.location.href =
+            "http://" +
+            crrUrl.host +
+            crrUrl.pathname +
+            "?page=" +
+            (parseInt(getQueryParam("page")) - 1);
+    }
+    return crrUrl;
 }

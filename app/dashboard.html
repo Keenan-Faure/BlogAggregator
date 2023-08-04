@@ -1,61 +1,47 @@
 <html>
-	<style>
-		.blocks {
-			background-color: grey;
-			text-align: center;
-			position: relative;
-			display: inline;
-			padding: 10px;
-			cursor: pointer;
-			transition-duration: 0.3s;
-		}
-		.blocks:hover {
-			background-color: rgb(186, 186, 186);
-		}
-	</style>
-	<body>
-		<div
-			style="
+<style>
+	.blocks {
+		background-color: grey;
+		text-align: center;
+		position: relative;
+		display: inline;
+		padding: 10px;
+		cursor: pointer;
+		transition-duration: 0.3s;
+	}
+
+	.blocks:hover {
+		background-color: rgb(186, 186, 186);
+	}
+</style>
+
+<body>
+	<div style="
 				position: relative;
 				width: fit-content;
 				top: 10%;
 				left: 50%;
 				transform: translate(-50%, 0);
-			"
-		>
-			<p style="text-align: center">Welcome to your dashboard!</p>
-			<hr />
-			<br />
-			<div
-				onclick="window.location.href='/app/feeds.html'"
-				class="blocks"
-			>
-				Feeds
-			</div>
-			<div
-				onclick="window.location.href='/app/feeds_followed.html?page=1'"
-				class="blocks"
-			>
-				Followed Feeds
-			</div>
-			<div
-				onclick="window.location.href='/app/posts.html?page=1'"
-				class="blocks"
-			>
-				Posts
-			</div>
-			<div
-				onclick="window.location.href='/app/bookmarks.html'"
-				class="blocks"
-			>
-				Bookmarks
-			</div>
-			<div
-				onclick="window.location.href='/app/liked_posts.html?page=1'"
-				class="blocks"
-			>
-				Liked
-			</div>
+			">
+		<p style="text-align: center">Welcome to your dashboard!</p>
+		<hr />
+		<br />
+		<div onclick="window.location.href='/app/feeds.html'" class="blocks">
+			Feeds
 		</div>
-	</body>
+		<div onclick="window.location.href='/app/feeds_followed.html?page=1'" class="blocks">
+			Followed Feeds
+		</div>
+		<div onclick="window.location.href='/app/posts.html?page=1'" class="blocks">
+			Posts
+		</div>
+		<div onclick="window.location.href='/app/bookmarks.html?page=1'" class="blocks">
+			Bookmarks
+		</div>
+		<div onclick="window.location.href='/app/liked_posts.html?page=1'" class="blocks">
+			Liked
+		</div>
+	</div>
+</body>
+
 </html>

@@ -1,9 +1,32 @@
 <html>
-	<head>
-		<script>
-			localStorage.getItem("api_key");
-			//make request to get data and display
-		</script>
-	</head>
-	<body></body>
+
+<head>
+	<link rel="stylesheet" href="/app/styles/css.css">
+	<script src="/app/scripts/dom_creator.js"></script>
+	<script src="/app/scripts/endpoints.js"></script>
+	<script src="/app/scripts/fetch.js"></script>
+	<script>
+		liked(
+			localStorage.getItem("api_key"),
+			getQueryParam("page")
+		);
+	</script>
+</head>
+
+<body>
+	<div class="general_container">
+		<p style="text-align: center">Liked</p>
+		<hr />
+		<div id="main" style="position: relative; width: 100%"></div>
+	</div>
+	<div class="pagination-holder">
+		<button onclick="prevPage('posts')" class="pagination">
+			Previous Page
+		</button>
+		<button onclick="nextPage('posts')" class="pagination">
+			Next Page
+		</button>
+	</div>
+</body>
+
 </html>

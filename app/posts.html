@@ -1,60 +1,32 @@
 <html>
-	<head>
-		<style>
-			.general_container {
-				position: relative;
-				width: 40%;
-				top: 5%;
-				left: 50%;
-				transform: translate(-50%, 0);
-			}
-			.blocks {
-				background-color: grey;
-				text-align: center;
-				position: relative;
-				display: inline-block;
-				width: 40%;
-				padding: 10px;
-				cursor: pointer;
-				transition-duration: 0.3s;
-				margin: 2px;
-			}
-			.blocks:hover {
-				background-color: rgb(186, 186, 186);
-			}
-			.scrape-text {
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				overflow: hidden;
-			}
-			.add-new {
-				position: absolute;
-				top: 10%;
-				left: 40%;
-				transform: translate(-50%, 0);
-			}
-			input[type="text"] {
-				border: 1px solid black;
-				left: 50%;
-				position: relative;
-				transform: translate(-50%, 0);
-			}
-		</style>
-		<script src="/app/scripts/dom_creator.js"></script>
-		<script src="/app/scripts/endpoints.js"></script>
-		<script src="/app/scripts/fetch.js"></script>
-		<script>
-			let data = posts(
-				localStorage.getItem("api_key"),
-				getQueryParam("page")
-			);
-		</script>
-	</head>
-	<body>
-		<div class="general_container">
-			<p style="text-align: center">Posts</p>
-			<hr />
-			<div id="main" style="position: relative; width: 100%"></div>
-		</div>
-	</body>
+
+<head>
+	<link rel="stylesheet" href="/app/styles/css.css">
+	<script src="/app/scripts/dom_creator.js"></script>
+	<script src="/app/scripts/endpoints.js"></script>
+	<script src="/app/scripts/fetch.js"></script>
+	<script>
+		posts(
+			localStorage.getItem("api_key"),
+			getQueryParam("page")
+		);
+	</script>
+</head>
+
+<body>
+	<div class="general_container">
+		<p style="text-align: center">Posts</p>
+		<hr />
+		<div id="main" style="position: relative; width: 100%"></div>
+	</div>
+	<div class="pagination-holder">
+		<button onclick="prevPage('posts')" class="pagination">
+			Previous Page
+		</button>
+		<button onclick="nextPage('posts')" class="pagination">
+			Next Page
+		</button>
+	</div>
+</body>
+
 </html>

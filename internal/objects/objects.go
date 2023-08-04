@@ -50,7 +50,7 @@ type ResponseBodyPosts struct {
 type ResponseBodyBookmark struct {
 	ID        uuid.UUID `json:"id"`
 	PostID    uuid.UUID `json:"post_id"`
-	UserID    uuid.UUID `json:"user_ud"`
+	UserID    uuid.UUID `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -58,7 +58,7 @@ type ResponseBodyBookmark struct {
 type ResponseBodyLiked struct {
 	ID        uuid.UUID `json:"id"`
 	PostID    uuid.UUID `json:"post_id"`
-	UserID    uuid.UUID `json:"user_ud"`
+	UserID    uuid.UUID `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
