@@ -171,8 +171,8 @@ func TestInitConfigWoo(t *testing.T) {
 	}
 	fmt.Println("Test Case 2 - Valid WooCommerce variables")
 	store_name = "test.com"
-	api_key = "cs_21233ljosidjalksd"
-	api_secret = "ck_123123nasldnasd"
+	api_key = "ck_21233ljosidjalksd"
+	api_secret = "cs_123123nasldnasd"
 	wooConfig = productfetch.InitConfigWoo(store_name, api_key, api_secret)
 	if !wooConfig.Valid {
 		t.Errorf("Expected 'true' but found 'false'")
@@ -234,7 +234,7 @@ func TestFetchWorker(t *testing.T) {
 		t.Errorf("Expected 'nil' but found: " + err.Error())
 	}
 	FetchWorker(dbconfig, productfetch.ConfigShopify{}, productfetch.ConfigWoo{})
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 5)
 	post, err := dbconfig.DB.GetFirstRecordPost(context.Background())
 	if err != nil {
 		t.Errorf("Expected 'nil' but found: " + err.Error())

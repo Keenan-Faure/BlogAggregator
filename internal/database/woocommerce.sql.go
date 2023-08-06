@@ -15,18 +15,20 @@ import (
 const createWooProduct = `-- name: CreateWooProduct :one
 INSERT INTO woocommerce(
     id,
+    store_name,
     title,
     sku,
     price,
     qty,
     created_at,
     updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, title, sku, price, qty, created_at, updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, title, sku, price, qty, created_at, updated_at, store_name
 `
 
 type CreateWooProductParams struct {
 	ID        uuid.UUID `json:"id"`
+	StoreName string    `json:"store_name"`
 	Title     string    `json:"title"`
 	Sku       string    `json:"sku"`
 	Price     string    `json:"price"`
@@ -38,6 +40,7 @@ type CreateWooProductParams struct {
 func (q *Queries) CreateWooProduct(ctx context.Context, arg CreateWooProductParams) (Woocommerce, error) {
 	row := q.db.QueryRowContext(ctx, createWooProduct,
 		arg.ID,
+		arg.StoreName,
 		arg.Title,
 		arg.Sku,
 		arg.Price,
@@ -54,12 +57,44 @@ func (q *Queries) CreateWooProduct(ctx context.Context, arg CreateWooProductPara
 		&i.Qty,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.StoreName,
+	)
+	return i, err
+}
+
+const deleteTestWooProducts = `-- name: DeleteTestWooProducts :exec
+DELETE FROM woocommerce
+WHERE store_name = $1
+`
+
+func (q *Queries) DeleteTestWooProducts(ctx context.Context, storeName string) error {
+	_, err := q.db.ExecContext(ctx, deleteTestWooProducts, storeName)
+	return err
+}
+
+const getFirstRecordWoo = `-- name: GetFirstRecordWoo :one
+SELECT id, title, sku, price, qty, created_at, updated_at, store_name FROM woocommerce
+LIMIT 1
+`
+
+func (q *Queries) GetFirstRecordWoo(ctx context.Context) (Woocommerce, error) {
+	row := q.db.QueryRowContext(ctx, getFirstRecordWoo)
+	var i Woocommerce
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Sku,
+		&i.Price,
+		&i.Qty,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.StoreName,
 	)
 	return i, err
 }
 
 const getWooProducts = `-- name: GetWooProducts :many
-SELECT id, title, sku, price, qty, created_at, updated_at FROM woocommerce
+SELECT id, title, sku, price, qty, created_at, updated_at, store_name FROM woocommerce
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -86,6 +121,7 @@ func (q *Queries) GetWooProducts(ctx context.Context, arg GetWooProductsParams) 
 			&i.Qty,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.StoreName,
 		); err != nil {
 			return nil, err
 		}
@@ -101,7 +137,7 @@ func (q *Queries) GetWooProducts(ctx context.Context, arg GetWooProductsParams) 
 }
 
 const searchWooProductBySKU = `-- name: SearchWooProductBySKU :many
-SELECT id, title, sku, price, qty, created_at, updated_at FROM woocommerce
+SELECT id, title, sku, price, qty, created_at, updated_at, store_name FROM woocommerce
 WHERE "sku" SIMILAR TO $1
 `
 
@@ -122,6 +158,7 @@ func (q *Queries) SearchWooProductBySKU(ctx context.Context, similarToEscape str
 			&i.Qty,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.StoreName,
 		); err != nil {
 			return nil, err
 		}
@@ -137,7 +174,7 @@ func (q *Queries) SearchWooProductBySKU(ctx context.Context, similarToEscape str
 }
 
 const searchWooProductByTitle = `-- name: SearchWooProductByTitle :many
-SELECT id, title, sku, price, qty, created_at, updated_at FROM woocommerce
+SELECT id, title, sku, price, qty, created_at, updated_at, store_name FROM woocommerce
 WHERE "title" SIMILAR TO $1
 `
 
@@ -158,6 +195,7 @@ func (q *Queries) SearchWooProductByTitle(ctx context.Context, similarToEscape s
 			&i.Qty,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.StoreName,
 		); err != nil {
 			return nil, err
 		}
@@ -179,7 +217,7 @@ price = $2,
 qty = $3,
 updated_at = $4
 WHERE "sku" = $5
-RETURNING id, title, sku, price, qty, created_at, updated_at
+RETURNING id, title, sku, price, qty, created_at, updated_at, store_name
 `
 
 type UpdateWooProductsParams struct {
@@ -207,6 +245,7 @@ func (q *Queries) UpdateWooProducts(ctx context.Context, arg UpdateWooProductsPa
 		&i.Qty,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.StoreName,
 	)
 	return i, err
 }

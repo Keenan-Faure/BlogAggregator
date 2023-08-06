@@ -60,12 +60,10 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 }
 
 const deleteTestFeeds = `-- name: DeleteTestFeeds :exec
-
 DELETE FROM feeds
 WHERE user_id = $1
 `
 
-// >> used for tests << --
 func (q *Queries) DeleteTestFeeds(ctx context.Context, userID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteTestFeeds, userID)
 	return err
