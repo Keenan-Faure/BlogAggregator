@@ -1,23 +1,26 @@
 # BlogAggregator
 
-A Blog Aggregator that fetches data from remote sources
+A Blog Aggregator that fetches data from remote sources with added extensions.
+
+Project can be found on [Boot.Dev](https://boot.dev)
 
 ## Main Features
 
-- Building a RESTful API in Go
+- A RESTful API in Go
 - Uses production-ready database tools like [PostgreSQL](https://www.postgresql.org), [SQLc](https://sqlc.dev), [Goose](https://github.com/pressly/goose), and [pgAdmin](https://www.pgadmin.org)
 - Database migration using goose
-- Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package
+- Use of Googles [UUID](https://pkg.go.dev/github.com/google/uuid) package to uniquely identify a record in a database (ID).
 - Fetching and encoding of xml RSS feeds
 - Use of [Wait Groups](https://pkg.go.dev/sync#WaitGroup) to bulk process RSS feeds
-- Fetching, storing and displaying JSON product data from E-Commerce websites like Shopify and WooCommerce.
-- Support different options for sorting and filtering posts using query parameters
-- Added Bookmarking & Liking to posts
-- Has integration tests that use the API to create, read, update, and delete feeds, posts, bookmarks and likes
 
 ### Extensions added
 
 - Supports pagination of the endpoints that can return many items. Visit docs in `README.md` for more information.
+- Fetching and storing of JSON product data from E-Commerce websites - Shopify and WooCommerce.
+- Support different options for sorting and filtering posts using query parameters
+- Added Bookmarking & Liking to posts.
+- Has integration tests that use the API to create, read, update, and delete feeds, posts, bookmarks and likes
+- Has a simple web UI that uses the backend API to Create, View, Follow Bookmark and Like feeds and posts.
 
 ## Prerequistes
 
@@ -65,7 +68,7 @@ go get github.com/lib/pq
 ### 5. Configuring the .env file
 
 By default you should have an `.env` file in your directory. However, these are default values!
-Kindly populate them with the correct data.
+Populate them with the correct values as per your configuration.
 
 ### 6. Run the migrations
 
@@ -113,8 +116,3 @@ This will **only** start up the API server, after which you can proceed to runni
 | `/v1/bookmark/{postID}`           | Removed the bookmark                | DELETE      |               |                                |                                              |
 | `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                    | DELETE      |               |                                |                                              |
 
-## Extensions (2 weeks extra)
-
-- Create a simple web UI that uses your backend API
-  - Landing page containing Navbar (Products, Feeds, Posts, Followed, Liked, bookmarked)
-  - Little CSS mostly HTML
