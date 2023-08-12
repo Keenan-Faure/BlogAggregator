@@ -115,4 +115,3 @@ This will **only** start up the API server, after which you can proceed to runni
 | `/v1/liked/{postID}`              | Unlikes a post                      | DELETE      |               |                                |                                              |
 | `/v1/bookmark/{postID}`           | Removed the bookmark                | DELETE      |               |                                |                                              |
 | `/v1/feed_follows/{feedFollowID}` | Unfollows a feed                    | DELETE      |               |                                |                                              |
-
