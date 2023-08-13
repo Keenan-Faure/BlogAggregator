@@ -8,3 +8,6 @@ go build -o out
 docker-compose rm -f
 
 docker compose up -d
+
+#Questions
+#What does the [] do in shell?

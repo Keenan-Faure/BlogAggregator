@@ -4,18 +4,19 @@ services:
         build: .
         ports:
             - "8000:${PORT}"
-        container_name: blog_aggregator
+        container_name: ${CONTAINER_NAME}
         env_file:
             - .env
     database:
+        container_name: ${DB_NAME}
         image: postgres
         ports:
             - "5432:5432"
         volumes:
-            - db-volume:/var/lib/postgresql/data
+            - ${VOLUME_NAME}:/var/lib/postgresql/data
         environment:
             - POSTGRES_USER=${DB_USER}
             - POSTGRES_PASSWORD=${DB_PSW}
 volumes:
-    db-volume:
+    ${VOLUME_NAME}:
         driver: local

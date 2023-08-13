@@ -2,6 +2,8 @@
 # If you are unable to run this file then run
 # chmod +x ./setdotenv
 
+IMAGE_NAME=blogaggregator-web
+
 docker stop blogaggregator-database-1
 docker stop blog_aggregator
 
@@ -9,8 +11,8 @@ docker rm blogaggregator-database-1
 docker rm blog_aggregator
 
 #removes images
-if [ $(docker inspect blogaggregator-web) == [] ]; then
-  echo "'blogaggregator-web' does not exist."
+if docker image inspect $IMAGE_NAME >/dev/null 2>&1; then
+  docker rmi $(docker images $IMAGE_NAME -a -q) -f
 else
-  docker rmi $(docker images 'blogaggregator-web' -a -q) -f
+  echo "'blogaggregator-web' does not exist."
 fi
