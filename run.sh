@@ -24,3 +24,7 @@ until docker exec $DOCKER_CONTAINER_NAME pg_isready ; do sleep 5 ; done
 
 #Questions
 #What does the [] do in shell?
+
+# create a shell file that does the migrations on the database
+# and everything else in the readme.md file...
+
