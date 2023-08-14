@@ -2,13 +2,13 @@
 # If you are unable to run this file then run
 # chmod +x ./setdotenv
 
-IMAGE_NAME=blogaggregator-web
+source .env
 
-docker stop blogaggregator-database-1
-docker stop blog_aggregator
+docker stop $CONTAINER_NAME
+docker stop $DB_NAME
 
-docker rm blogaggregator-database-1
-docker rm blog_aggregator
+docker rm $CONTAINER_NAME
+docker rm $DB_NAME
 
 #removes images
 if docker image inspect $IMAGE_NAME >/dev/null 2>&1; then
