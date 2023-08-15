@@ -27,5 +27,6 @@ do
     sleep 3; 
 done
 
-docker 
-#/web-app/sql/schema/migrations.sh
+echo "--Running database Migrations--"
+docker exec blog_agg bash -c ./sql/schema/migrations.sh
+
