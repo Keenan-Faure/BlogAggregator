@@ -2,7 +2,7 @@ version: "2"
 services:
     web:
         volumes:
-            - ./app/:/app
+            - ./app/:/web-app/app
         build: .
         ports:
             - "${PORT}:${PORT}"
@@ -24,11 +24,6 @@ services:
             - POSTGRES_PASSWORD=${DB_PSW}
         networks:
             - blog_network
-    test:
-        networks:
-            - blog_network
-        container_name: test
-        image: docker/getting-started
 volumes:
     blog_vol:
         driver: local
