@@ -27,3 +27,5 @@ do
     sleep 3; 
 done
 
+docker 
+#/web-app/sql/schema/migrations.sh

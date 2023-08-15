@@ -4,6 +4,7 @@ import (
 	"blog/internal/database"
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -28,6 +29,7 @@ func FetchWorker(
 	dbconfig dbConfig,
 	shopConf productfetch.ConfigShopify,
 	wooConf productfetch.ConfigWoo) {
+	fmt.Println(dbconfig.Valid)
 	if dbconfig.Valid {
 		go LoopXML(dbconfig, fetch_time_xml)
 	}
@@ -256,6 +258,7 @@ func ProcessWooProducts(dbconfig dbConfig, products objects.WooProducts) {
 func LoopXML(dbconfig dbConfig, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for ; ; <-ticker.C {
+		fmt.Println("tick tock")
 		unprocessedFeeds, err := dbconfig.DB.GetNextFeedsToFetch(context.Background(), n_feeds_to_fetch)
 		if err != nil {
 			log.Println("Error fetching next feeds to process:", err)

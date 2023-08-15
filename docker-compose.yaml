@@ -3,6 +3,8 @@ services:
     web:
         volumes:
             - ./app/:/web-app/app
+        depends_on:
+            - postgres
         build: .
         ports:
             - "${PORT}:${PORT}"

@@ -14,5 +14,4 @@ COPY .env /web-app/sql/schema/
 RUN ["chmod", "+x", "/web-app/sql/schema/migrations.sh"]
 
 COPY out /web-app/
-ENTRYPOINT [ "/web-app/out" ]
-CMD ["/web-app/sql/schema/migrations.sh"]
+CMD [ "/web-app/out" ]
