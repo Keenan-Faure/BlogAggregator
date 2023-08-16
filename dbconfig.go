@@ -10,6 +10,7 @@ import (
 // Initiates a connection to the database and
 // if successful returns the connection
 func InitConn(dbURL string) (dbConfig, error) {
+	log.Println(dbURL)
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal("Error connecting to the database: ", err)
@@ -24,6 +25,7 @@ func storeConfig(conn *sql.DB) dbConfig {
 		Limit:  1,
 		Offset: 0,
 	})
+	log.Println(err)
 	if err == nil {
 		config := dbConfig{
 			DB:    database.New(conn),

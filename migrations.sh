@@ -1,9 +1,5 @@
 #!/bin/bash
-
-cd ..
-cd /sql/schema
-pwd
-
+cd /web-app/sql/schema
 source .env
 
 echo "Checking GOOSE version"
