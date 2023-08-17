@@ -21,8 +21,11 @@ Project can be found on [Boot.Dev](https://boot.dev)
 - Added Bookmarking & Liking to posts.
 - Has integration tests that use the API to create, read, update, and delete feeds, posts, bookmarks and likes
 - Has a simple web UI that uses the backend API to Create, View, Follow Bookmark and Like feeds and posts.
+- Add a Docker implementation of the project, more info found [below](https://github.com/Keenan-Faure/BlogAggregator#docker-implementation)
 
 ## Prerequistes
+
+This assumes the code already exists on your local machine, hence, please download the project code files.
 
 ### 1. Install POSTGRESQL and check if install was successful
 
@@ -81,6 +84,28 @@ protocol://username:password@host:port/database
 ```
 
 Note that if the prerequistes are not completed, then the application will fail to run (ಥ \_ ಥ)
+
+## Docker implementation
+
+Note the docker container on DockerHub is not available yet :o
+Hence, I have left out that implementation.
+
+This assumes the project file already exist locally on your machine and that you have navigated to the local directory
+in your command line (`bash`, `zsh`)
+
+### Installing Docker
+
+Depending on your Operating System download and install [Docker](https://www.docker.com/products/docker-desktop/)
+
+### Running the shell commands
+
+Outline of shell commands
+
+| Command      | Description                                                                      |
+| ------------ | -------------------------------------------------------------------------------- |
+| `./run.sh`   | Starts the docker containers and the application                                 |
+| `./stop.sh`  | Stops the docker containers                                                      |
+| `./reset.sh` | Removes all containers, volumes & images locally (does not run `./run.sh` again) |
 
 ## API Integration Tests
 
