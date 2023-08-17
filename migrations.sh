@@ -6,7 +6,7 @@ echo "Checking GOOSE version"
 goose -version
 
 SSL_MODE="?sslmode=disable"
-DB_STRING="${DB_URL}${DATABASE}${SSL_MODE}"
+DB_STRING="${DOCKER_DB_URL}${DATABASE}${SSL_MODE}"
 
 echo $DB_STRING
 
