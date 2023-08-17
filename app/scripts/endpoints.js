@@ -128,21 +128,21 @@ function liked(api_key, page) {
 }
 
 /**
- * Fetches all followed feeds for the user
+ * Likes a post for a user
  * @param {string} api_key APIKey of user
- * @param {string} page Current page number
+ * @param {string} postid Post ID
  * @returns {null}
  */
-function liked(api_key, page) {
-    getEndpoint(
+function like(api_key, postid) {
+    postEndpoint(
         "liked",
-        "GET",
+        "POST",
         {
             Authorization: "ApiKey " + api_key,
         },
+        {},
         {
-            page: page,
-            sort: "desc",
+            post_id: postid,
         }
     );
 }
@@ -150,7 +150,7 @@ function liked(api_key, page) {
 /**
  * Adds a new bookmark to the user
  * @param {string} apikey APIKey of user
- * @param {string} post_id Post ID
+ * @param {string} postid Post ID
  * @returns {null}
  */
 function bookmark(api_key, postid) {
@@ -207,5 +207,3 @@ function feedFollows(api_key, page) {
         }
     );
 }
-
-

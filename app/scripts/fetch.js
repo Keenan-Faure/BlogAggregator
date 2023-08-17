@@ -74,8 +74,6 @@ const postEndpoint = async function (
         body: JSON.stringify(bodyData),
     });
     const json = await resp.json();
-    console.log(json);
-    console.log(endpoint);
     let adHocMessage = EndpointAdHoc(endpoint, method, json, resp);
     if (adHocMessage != "undefined") {
         Message(adHocMessage, resp);

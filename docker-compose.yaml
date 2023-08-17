@@ -1,0 +1,35 @@
+version: "2"
+services:
+    web:
+        volumes:
+            - ./app/:/web-app/app
+        depends_on:
+            - postgres
+        build: .
+        ports:
+            - "${PORT}:${PORT}"
+        container_name: ${CONTAINER_NAME}
+        env_file:
+            - .env
+        networks:
+            - blog_network
+    postgres:
+        restart: always
+        container_name: ${DB_NAME}
+        image: postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - blog_vol:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PSW}
+        networks:
+            - blog_network
+volumes:
+    blog_vol:
+        driver: local
+
+networks:
+    blog_network:
+        driver: bridge
